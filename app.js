@@ -49,13 +49,19 @@ function checkTemplate({ checked }) {
 }
 
 /**
- *
- * @template {HTMLElement} H
- * @param {Object} param
- * @param {string} param.value
- * @param {H} param.acceptType
+ * @template T
+ * @typedef {Object} pickerOpt
+ * @property {string} value
+ * @property {(target:T,_this:XInput) => void} fn
  */
-function pickerTemplate({ value = "", acceptType }) {
+
+/**
+ * @param {Object} param
+ * @param {HTMLElement} param.acceptType
+ * @param {string} param.value
+ * @param {(target:HTMLElement,_this:XInput)=>void} param.fn
+ */
+function pickerTemplate({ value = "", acceptType, fn }) {
     let htmlString = "";
     htmlString += `<input id="parameter" type="button" value="${value}" />`;
     return htmlString;
@@ -64,12 +70,10 @@ function pickerTemplate({ value = "", acceptType }) {
 /**
  * @param {PointerEvent} e
  */
-function pickerHandler(a, e) {
+function pickerHandler(a, fn = () => null, e) {
     window.onpointerdown = (ee) => {
         if (ee.target instanceof a && ee.target != this) {
-            console.log(ee.target.value);
-            console.log(ee.target.getName());
-            this.value = ee.target.getName();
+            fn(ee.target, this);
             window.onpointerdown = null;
         }
     };
@@ -251,7 +255,11 @@ class XInput extends HTMLElement {
         this.shadowRoot.innerHTML += template(opt);
 
         if (type == "picker") {
-            this.onpointerdown = pickerHandler.bind(this, opt.acceptType);
+            this.onpointerdown = pickerHandler.bind(
+                this,
+                opt.acceptType,
+                opt.fn
+            );
             // window.onpointerdown = pickerHandler.bind(this, opt.acceptType);
         } else {
             window.onpointerdown = null;
@@ -312,9 +320,11 @@ xInp2.setName("switch");
 /**@type {XInput} */
 const xInp3 = document.createElement("x-input");
 xInp3.setType("picker", {
-    checked: false,
     value: "[:]",
     acceptType: XInput,
+    fn: (target, _this) => {
+        _this.value = target.getName();
+    },
 });
 // xInp3.setName("module");
 
