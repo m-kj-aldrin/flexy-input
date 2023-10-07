@@ -94,6 +94,36 @@ const rangeTemplate = `
 <style>
   :host{
     display: contents;
+    cursor: pointer;
+  }
+
+  :host(:active){
+  }
+
+  text {
+    opacity: 0;
+    transition-delay: 500ms;
+    transition-duration: 325ms;
+    transition-timingfunction: ease;
+    transition-property: opacity;
+  }
+
+  :host(:hover) text{
+    opacity: 1;
+    transition-duration: 125ms;
+    transition-delay: 0ms;
+  }
+
+
+
+  circle {
+    transition: r 200ms ease;
+  }
+
+  :host(:active) circle{
+    r: 5px;
+    fill: none;
+    stroke: currentColor;
   }
   
   svg {
@@ -104,9 +134,10 @@ const rangeTemplate = `
 </style>
 <svg width="128" height="16">
   <g id="track" transform="translate(0 8)">
-    <path d="M0,0 h128" stroke="red" line-width="1" />
-    <circle cx="0" cy="0" r="4" fill="blue" />
+    <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
+    <circle cx="0" cy="0" r="4" fill="currentColor" />
   </g>
+  <text x="0" y="24" font-size="10">hello</text>
 </svg>
 `;
 
@@ -151,12 +182,11 @@ export class InputRange extends Base {
             const circle = this.svg.querySelector("circle");
             let currentX = +circle.getAttribute("cx");
 
-            if (currentX != x) {
-                this.value = x / (box.width - 1);
-                prevVal = this.value;
-            }
+            const newValue = x / (box.width - 1);
 
-            this.value = x / (box.width - 1);
+            if (this.value != newValue) {
+                this.value = newValue;
+            }
 
             this.svg.onpointermove = (ee) => {
                 currentX = +circle.getAttribute("cx");
@@ -203,6 +233,11 @@ export class InputRange extends Base {
         if (this._value != f) {
             this._value = f;
             this.svg.querySelector("circle").setAttribute("cx", 128 * f);
+            this.svg.querySelector("text").setAttribute("dx", 128 * f);
+            this.svg.querySelector("text").textContent = this._value;
+            // this.svg
+            //     .querySelector("circle")
+            //     .style.setProperty("cx", `${128 * f}px`);
             this.dispatchEvent(new Event("input", { bubbles: true }));
         }
     }
@@ -221,22 +256,52 @@ const selectTemplateStyle = `
     -webkit-user-select: none;
   }
   :host{
-    display: contents;
+    border: 1px currentColor solid;
+    display: grid;
+    width: max-content;
+    padding: 2px;
+    border-radius: 2px;
   }
 
   #select{
-    border: 1px currentColor solid;
     position: relative;
-    width: max-content;
     cursor: pointer;
   }
 
-  #select,#options{
-    display: flex;
+
+
+  #options {
+    margin-top: 6px;
+    min-width: 100%;
+    left: -3px;
+    position: absolute;
+    background-color: white;
     flex-direction: column;
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background-color: white;
+    border: 1px currentColor solid;
+    border-radius: 2px;
+    pointer-events: none;
+    transform: translateY(-4px);
+
+    opacity: 0;
+    transition-duration: 500ms,100ms;
+    transition-timingfunction: ease;
+    transition-property: transform,opacity;
+    transition-delay: 50ms,200ms;
   }
 
-  :host([open]){
+  #select,#options{
+  }
+
+  :host([open]) #options{
+    pointer-events: unset;
+    opacity: 1;
+    transition-duration: 200ms,100ms;
+    transform: translateY(0);
+    transition-delay: 0ms;
   }
 
   :host([open]) #options{
@@ -244,17 +309,19 @@ const selectTemplateStyle = `
   }
 
   :host([open]) #selected{
-    font-weight: 1000;
-    cursor: default;
   }
 
   :host([open]) ::slotted(input-opt:hover){
     color: red;
   }
 
-  :host(:not([open])) ::slotted(input-opt:not([selected])){
-    display: none;
+  ::slotted(input-opt){
   }
+
+  :host(:not([open])) ::slotted(input-opt:not([selected])){
+  }
+
+  
 
   ::slotted(input-opt[selected]){
     display: none;
@@ -262,11 +329,11 @@ const selectTemplateStyle = `
 
 </style>
 <div id="select">
+  <div id="selected"></div>
   <div id="options">
-    <div id="selected"></div>
     <slot></slot>
   </div>
-<div>
+</div>
 `;
 
 /**@type {typeof clickOutsideHandler} */
@@ -301,12 +368,17 @@ export class InputSelect extends Base {
         });
 
         this.shadowRoot.addEventListener("pointerdown", (e) => {
-            if (e.target.id == "selected" && !this.hasAttribute("open")) {
-                this.toggleAttribute("open", true);
-                window.addEventListener(
-                    "pointerdown",
-                    (boundClickOutsideHandler = clickOutsideHandler.bind(this))
-                );
+            if (e.target.id == "selected") {
+                if (!this.hasAttribute("open")) {
+                    this.toggleAttribute("open", true);
+                    window.addEventListener(
+                        "pointerdown",
+                        (boundClickOutsideHandler =
+                            clickOutsideHandler.bind(this))
+                    );
+                } else {
+                    this.removeAttribute("open");
+                }
             }
 
             if (e.target instanceof InputOption) {
@@ -330,6 +402,7 @@ export class InputSelect extends Base {
                     e.target.label;
 
                 this.dispatchEvent(new Event("change", { bubbles: true }));
+            } else {
             }
         });
     }
@@ -470,11 +543,11 @@ customElements.define("input-switch", InputSwitch);
 
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-inpRange0.steps = 128;
+inpRange0.steps = 10;
 inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
-inpSelect0.list = ["cool", "blo", "ok"];
+inpSelect0.list = ["sine", "tri", "ramp up", "ramp down"];
 
 const inpSwitch0 = document.createElement("input-switch");
 
@@ -485,5 +558,5 @@ document.body.addEventListener("change", (e) => {
 });
 
 document.body.addEventListener("input", (e) => {
-    console.log(e.target.value);
+    // console.log(e.target.value);
 });
