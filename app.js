@@ -90,89 +90,6 @@ class Base extends HTMLElement {
     }
 }
 
-// const rangeTemplateStyle = `
-// <style>
-//     input[type="range"] {
-//         cursor: pointer;
-//         -webkit-appearance: none;
-//         background-color: transparent;
-//     }
-
-//     input[type="range"]:focus {
-//         outline: none;
-//     }
-//     input[type="range"]::-webkit-slider-runnable-track {
-//         width: 100%;
-//         height: 2px;
-//         background: currentColor;
-//         border-radius: 40px;
-//     }
-//     input[type="range"]::-webkit-slider-thumb {
-//         height: 8px;
-//         aspect-ratio: 1/1;
-//         border-radius: 50%;
-//         background: currentColor;
-//         -webkit-appearance: none;
-//         margin-top: -3px;
-//     }
-
-//     input[type="range"]:active::-webkit-slider-thumb {
-//     }
-
-//     input[type="range"]::-moz-range-track {
-//         width: 100%;
-//         height: 2px;
-//         background: currentColor;
-//         border-radius: 40px;
-//     }
-
-//     input[type="range"]::-moz-range-thumb {
-//         height: 8px;
-//         width: 8px;
-//         border-radius: 50%;
-//         background: currentColor;
-//         margin-top: -3px;
-//         border: none;
-//     }
-// </style>
-// `;
-
-// export class InputRange extends Base {
-//     constructor() {
-//         super();
-//         this.shadowRoot.innerHTML += rangeTemplateStyle;
-
-//         this.input = document.createElement("input");
-//         this.input.type = "range";
-
-//         this.shadowRoot.appendChild(this.input);
-//     }
-
-//     /**@param {{min:number,max:number}} o  */
-//     set minmax({ min, max }) {
-//         this.input.min = min.toString();
-//         this.input.max = max.toString();
-//     }
-
-//     /**@param {number} v */
-//     set steps(v) {
-//         const min = +this.input.min;
-//         const max = +this.input.max;
-//         const range = max - min;
-//         const rangeStep = range / v;
-//         this.input.step = rangeStep.toString();
-//     }
-
-//     /**@param {number} v*/
-//     set value(v) {
-//         this.input.value = v.toString();
-//     }
-
-//     get value() {
-//         return +this.input.value;
-//     }
-// }
-
 const rangeTemplate = `
 <style>
   :host{
@@ -490,15 +407,78 @@ export class InputOption extends Base {
 
 customElements.define("input-opt", InputOption);
 
+const switchTemplate = `
+<style>
+  :host {
+    display: grid;
+    width: max-content;
+    place-content: center;
+    cursor: pointer;
+    margin-block: 4px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px currentColor solid;
+  }
+
+  svg {
+    padding: 1.5px;
+    display: block;
+  }
+
+  circle {
+    transition: cx 75ms ease;
+  }
+
+  :host([open]) circle {
+    cx: 12px;
+  }
+</style>
+<svg width="16" height="8">
+  <g transform="translate(0 4)">
+    <circle cx="4" r="4" />
+  </g>
+</svg>
+`;
+
+export class InputSwitch extends Base {
+    constructor() {
+        super();
+
+        this.shadowRoot.innerHTML += switchTemplate;
+
+        /**@private */
+        this._value = null;
+
+        this.onpointerdown = (e) => {
+            this.toggleAttribute("open");
+            this.value = this.hasAttribute("open");
+            this.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+    }
+
+    /**@param {boolean} v */
+    set value(v) {
+        this._value = v;
+    }
+
+    get value() {
+        return this._value;
+    }
+}
+
+customElements.define("input-switch", InputSwitch);
+
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-inpRange0.steps = 32;
+inpRange0.steps = 128;
 inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
 inpSelect0.list = ["cool", "blo", "ok"];
 
-document.body.append(inpRange0, inpSelect0);
+const inpSwitch0 = document.createElement("input-switch");
+
+document.body.append(inpRange0, inpSelect0, inpSwitch0);
 
 document.body.addEventListener("change", (e) => {
     console.log(e.target.value);
@@ -507,7 +487,3 @@ document.body.addEventListener("change", (e) => {
 document.body.addEventListener("input", (e) => {
     console.log(e.target.value);
 });
-
-// const test = document.createElement("input-opt")
-// test.textContent = "hello"
-// document.body.appendChild(test)
