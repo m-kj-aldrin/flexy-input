@@ -74,6 +74,15 @@ const baseTemplateStyle = `
   <style>
     :host {
     }
+
+    :host(:focus-within){
+      outline: 1px currentColor dashed;
+      outline-offset: 1px;
+    }
+
+    :focus{
+      outline: none;
+    }
   </style>
 `;
 
@@ -93,8 +102,8 @@ class Base extends HTMLElement {
 const rangeTemplate = `
 <style>
   :host{
-    display: contents;
     cursor: pointer;
+    width: max-content;
   }
 
   :host(:active){
@@ -132,7 +141,7 @@ const rangeTemplate = `
   }
 
 </style>
-<svg width="128" height="16">
+<svg width="128" height="16" tabindex="0">
   <g id="track" transform="translate(0 8)">
     <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
     <circle cx="0" cy="0" r="4" fill="currentColor" />
@@ -259,7 +268,6 @@ const selectTemplateStyle = `
     border: 1px currentColor solid;
     display: grid;
     width: max-content;
-    padding: 2px;
     border-radius: 2px;
   }
 
@@ -268,18 +276,20 @@ const selectTemplateStyle = `
     cursor: pointer;
   }
 
-
+  #selected{
+    padding: 2px;
+  }
 
   #options {
     margin-top: 6px;
     min-width: 100%;
-    left: -3px;
     position: absolute;
+    left: -1px;
     background-color: white;
     flex-direction: column;
     display: flex;
-    gap: 2px;
-    padding: 2px;
+    gap: 4px;
+    padding: 4px;
     background-color: white;
     border: 1px currentColor solid;
     border-radius: 2px;
@@ -311,8 +321,9 @@ const selectTemplateStyle = `
   :host([open]) #selected{
   }
 
-  :host([open]) ::slotted(input-opt:hover){
-    color: red;
+  ::slotted(input-opt:hover){
+    outline: 1px currentColor dashed;
+    outline-offset: 1px;
   }
 
   ::slotted(input-opt){
@@ -328,7 +339,7 @@ const selectTemplateStyle = `
   }
 
 </style>
-<div id="select">
+<div id="select" tabindex="0">
   <div id="selected"></div>
   <div id="options">
     <slot></slot>
@@ -367,9 +378,57 @@ export class InputSelect extends Base {
             this.value = firstOpt.value;
         });
 
+        this.shadowRoot.addEventListener("keydown", (e) => {
+            if (e.key == "Escape") {
+                this.shadowRoot
+                    .getElementById("selected")
+                    .dispatchEvent(
+                        new PointerEvent("pointerdown", { bubbles: true })
+                    );
+            }
+            if (e.key == "Tab") {
+                const shift = e.shiftKey;
+
+                let next = e.target.nextElementSibling;
+                next = next?.hasAttribute("selected")
+                    ? next.nextElementSibling
+                    : next;
+
+                let prev = e.target.previousElementSibling;
+                prev = prev?.hasAttribute("selected")
+                    ? prev.previousElementSibling
+                    : prev;
+
+                console.log(prev);
+
+                if (!shift && !next) e.preventDefault();
+                if (shift && !prev) e.preventDefault();
+            }
+            if (e.key == "Enter" || e.key == " ") {
+                if (!this.hasAttribute("open")) {
+                    this.shadowRoot
+                        .getElementById("selected")
+                        .dispatchEvent(
+                            new PointerEvent("pointerdown", { bubbles: true })
+                        );
+                } else {
+                    e.target.dispatchEvent(
+                        new PointerEvent("pointerdown", { bubbles: true })
+                    );
+                }
+            }
+        });
+
         this.shadowRoot.addEventListener("pointerdown", (e) => {
             if (e.target.id == "selected") {
                 if (!this.hasAttribute("open")) {
+                    this.querySelectorAll("input-opt:not([selected]").forEach(
+                        (o, i) => {
+                            o.tabIndex = 0;
+                        }
+                    );
+                    this.querySelector("input-opt:not([selected])").focus();
+
                     this.toggleAttribute("open", true);
                     window.addEventListener(
                         "pointerdown",
@@ -378,6 +437,9 @@ export class InputSelect extends Base {
                     );
                 } else {
                     this.removeAttribute("open");
+                    this.querySelectorAll("input-opt").forEach((o) =>
+                        o.removeAttribute("tabindex")
+                    );
                 }
             }
 
@@ -387,6 +449,9 @@ export class InputSelect extends Base {
                     boundClickOutsideHandler
                 );
                 this.removeAttribute("open");
+                this.querySelectorAll("input-opt").forEach((o) =>
+                    o.removeAttribute("tabindex")
+                );
 
                 if (this.value == e.target.value) {
                     return;
@@ -431,7 +496,8 @@ export class InputSelect extends Base {
 customElements.define("input-select", InputSelect);
 
 const optTemplate = `
-<style></style>
+<style>
+</style>
 <slot></slot>
 `;
 
@@ -506,7 +572,7 @@ const switchTemplate = `
     cx: 12px;
   }
 </style>
-<svg width="16" height="8">
+<svg width="16" height="8" tabindex="0">
   <g transform="translate(0 4)">
     <circle cx="4" r="4" />
   </g>
@@ -543,7 +609,7 @@ customElements.define("input-switch", InputSwitch);
 
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-inpRange0.steps = 10;
+inpRange0.steps = 32;
 inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
