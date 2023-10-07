@@ -90,86 +90,208 @@ class Base extends HTMLElement {
     }
 }
 
-const rangeTemplateStyle = `
+// const rangeTemplateStyle = `
+// <style>
+//     input[type="range"] {
+//         cursor: pointer;
+//         -webkit-appearance: none;
+//         background-color: transparent;
+//     }
+
+//     input[type="range"]:focus {
+//         outline: none;
+//     }
+//     input[type="range"]::-webkit-slider-runnable-track {
+//         width: 100%;
+//         height: 2px;
+//         background: currentColor;
+//         border-radius: 40px;
+//     }
+//     input[type="range"]::-webkit-slider-thumb {
+//         height: 8px;
+//         aspect-ratio: 1/1;
+//         border-radius: 50%;
+//         background: currentColor;
+//         -webkit-appearance: none;
+//         margin-top: -3px;
+//     }
+
+//     input[type="range"]:active::-webkit-slider-thumb {
+//     }
+
+//     input[type="range"]::-moz-range-track {
+//         width: 100%;
+//         height: 2px;
+//         background: currentColor;
+//         border-radius: 40px;
+//     }
+
+//     input[type="range"]::-moz-range-thumb {
+//         height: 8px;
+//         width: 8px;
+//         border-radius: 50%;
+//         background: currentColor;
+//         margin-top: -3px;
+//         border: none;
+//     }
+// </style>
+// `;
+
+// export class InputRange extends Base {
+//     constructor() {
+//         super();
+//         this.shadowRoot.innerHTML += rangeTemplateStyle;
+
+//         this.input = document.createElement("input");
+//         this.input.type = "range";
+
+//         this.shadowRoot.appendChild(this.input);
+//     }
+
+//     /**@param {{min:number,max:number}} o  */
+//     set minmax({ min, max }) {
+//         this.input.min = min.toString();
+//         this.input.max = max.toString();
+//     }
+
+//     /**@param {number} v */
+//     set steps(v) {
+//         const min = +this.input.min;
+//         const max = +this.input.max;
+//         const range = max - min;
+//         const rangeStep = range / v;
+//         this.input.step = rangeStep.toString();
+//     }
+
+//     /**@param {number} v*/
+//     set value(v) {
+//         this.input.value = v.toString();
+//     }
+
+//     get value() {
+//         return +this.input.value;
+//     }
+// }
+
+const rangeTemplate = `
 <style>
-    input[type="range"] {
-        cursor: pointer;
-        -webkit-appearance: none;
-        background-color: transparent;
-    }
-    
-    input[type="range"]:focus {
-        outline: none;
-    }
-    input[type="range"]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 2px;
-        background: currentColor;
-        border-radius: 40px;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-        height: 8px;
-        aspect-ratio: 1/1;
-        border-radius: 50%;
-        background: currentColor;
-        -webkit-appearance: none;
-        margin-top: -3px;
-    }
-    
-    input[type="range"]:active::-webkit-slider-thumb {
-    }
-    
-    input[type="range"]::-moz-range-track {
-        width: 100%;
-        height: 2px;
-        background: currentColor;
-        border-radius: 40px;
-    }
-    
-    input[type="range"]::-moz-range-thumb {
-        height: 8px;
-        width: 8px;
-        border-radius: 50%;
-        background: currentColor;
-        margin-top: -3px;
-        border: none;
-    }
+  :host{
+    display: contents;
+  }
+  
+  svg {
+    overflow: visible;
+    display: block;
+  }
+
 </style>
+<svg width="128" height="16">
+  <g id="track" transform="translate(0 8)">
+    <path d="M0,0 h128" stroke="red" line-width="1" />
+    <circle cx="0" cy="0" r="4" fill="blue" />
+  </g>
+</svg>
 `;
+
+function clamp(x, min, max) {
+    return Math.min(Math.max(x, min), max);
+}
+
+/**
+ * @param {number} x
+ * @param {number} q
+ */
+function quantize(x, q) {
+    let d = x / q;
+    x = Math.floor(+d.toPrecision(12));
+    const v = x * q;
+    return +v.toPrecision(12);
+}
 
 export class InputRange extends Base {
     constructor() {
         super();
-        this.shadowRoot.innerHTML += rangeTemplateStyle;
 
-        this.input = document.createElement("input");
-        this.input.type = "range";
+        /**@private */
+        this._value = null;
 
-        this.shadowRoot.appendChild(this.input);
+        /**@private */
+        this._minmax = { min: null, max: null };
+
+        /**@private */
+        this._step = 1;
+
+        this.shadowRoot.innerHTML += rangeTemplate;
+        this.svg = this.shadowRoot.querySelector("svg");
+
+        this.svg.onpointerdown = (e) => {
+            this.svg.setPointerCapture(e.pointerId);
+
+            const box = this.svg.getBoundingClientRect();
+
+            let x = clamp(e.clientX - box.x, 0, box.width);
+
+            const circle = this.svg.querySelector("circle");
+            let currentX = +circle.getAttribute("cx");
+
+            if (currentX != x) {
+                this.value = x / (box.width - 1);
+                prevVal = this.value;
+            }
+
+            this.value = x / (box.width - 1);
+
+            this.svg.onpointermove = (ee) => {
+                currentX = +circle.getAttribute("cx");
+                x = clamp(ee.clientX - box.x, 0, box.width);
+                if (currentX != x) {
+                    this.value = x / (box.width - 1);
+                }
+            };
+        };
+
+        let prevVal = null;
+
+        this.svg.onpointerup = (e) => {
+            if (prevVal != this.value) {
+                prevVal = this.value;
+                this.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+            this.svg.releasePointerCapture(e.pointerId);
+            this.svg.onpointermove = null;
+        };
     }
 
-    /**@param {{min:number,max:number}} o  */
+    /**@param {{min:number,max:number}} o */
     set minmax({ min, max }) {
-        this.input.min = min.toString();
-        this.input.max = max.toString();
+        this._minmax = { min, max };
+    }
+
+    get minmax() {
+        return this._minmax;
+    }
+
+    /**@param {number} n */
+    set steps(n) {
+        const { min, max } = this._minmax;
+        const rangeStep = (max - min) / n;
+        this._step = rangeStep;
     }
 
     /**@param {number} v */
-    set steps(v) {
-        const min = +this.input.min;
-        const max = +this.input.max;
-        const range = max - min;
-        const rangeStep = range / v;
-        this.input.step = rangeStep.toString();
-    }
-
-    /**@param {number} v*/
     set value(v) {
-        this.input.value = v.toString();
+        const { min, max } = this.minmax;
+        const range = max - min;
+        const f = quantize(range * v, this._step);
+        if (this._value != f) {
+            this._value = f;
+            this.svg.querySelector("circle").setAttribute("cx", 128 * f);
+            this.dispatchEvent(new Event("input", { bubbles: true }));
+        }
     }
 
     get value() {
-        return +this.input.value;
+        return this._value;
     }
 }
 
@@ -238,7 +360,7 @@ function clickOutsideHandler(e) {
     const parentSelect = target.closest("input-select");
     // console.log(e);
     if (this != parentSelect) {
-        console.log("outside");
+        // console.log("outside");
         this.removeAttribute("open");
         window.removeEventListener("pointerdown", boundClickOutsideHandler);
     }
@@ -370,8 +492,8 @@ customElements.define("input-opt", InputOption);
 
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-inpRange0.steps = 20;
-inpRange0.value = 0.05;
+inpRange0.steps = 32;
+inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
 inpSelect0.list = ["cool", "blo", "ok"];
@@ -379,6 +501,10 @@ inpSelect0.list = ["cool", "blo", "ok"];
 document.body.append(inpRange0, inpSelect0);
 
 document.body.addEventListener("change", (e) => {
+    console.log(e.target.value);
+});
+
+document.body.addEventListener("input", (e) => {
     console.log(e.target.value);
 });
 
