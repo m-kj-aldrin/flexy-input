@@ -23,8 +23,6 @@ const reset = `
     outline: 1px currentColor solid;
     outline-offset: 1px;
   }
-  
-
 
   select,input:not([type="number"]){
     cursor: pointer;
@@ -73,19 +71,10 @@ const reset = `
 `;
 
 const baseTemplateStyle = `
-<style>
-    input,select {
-      font-family: inherit;
-      color: inherit;
-      font-size: inherit;
-
-      border: none;
-      border-radius: 1px;
-      background-color: transparent;
-
-      padding: 4px;
+  <style>
+    :host {
     }
-</style>
+  </style>
 `;
 
 class Base extends HTMLElement {
@@ -148,10 +137,6 @@ const rangeTemplateStyle = `
 </style>
 `;
 
-const inputTemplate = `
-
-`;
-
 export class InputRange extends Base {
     constructor() {
         super();
@@ -190,13 +175,213 @@ export class InputRange extends Base {
 
 customElements.define("input-range", InputRange);
 
+const selectTemplateStyle = `
+<style>
+  *{
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  :host{
+    display: contents;
+  }
+
+  #select{
+    border: 1px currentColor solid;
+    position: relative;
+    width: max-content;
+    cursor: pointer;
+  }
+
+  #select,#options{
+    display: flex;
+    flex-direction: column;
+  }
+
+  :host([open]){
+  }
+
+  :host([open]) #options{
+    display: flex;
+  }
+
+  :host([open]) #selected{
+    font-weight: 1000;
+    cursor: default;
+  }
+
+  :host([open]) ::slotted(input-opt:hover){
+    color: red;
+  }
+
+  :host(:not([open])) ::slotted(input-opt:not([selected])){
+    display: none;
+  }
+
+  ::slotted(input-opt[selected]){
+    display: none;
+  }
+
+</style>
+<div id="select">
+  <div id="options">
+    <div id="selected"></div>
+    <slot></slot>
+  </div>
+<div>
+`;
+
+/**@type {typeof clickOutsideHandler} */
+let boundClickOutsideHandler;
+
+function clickOutsideHandler(e) {
+    const target = e.target;
+    const parentSelect = target.closest("input-select");
+    // console.log(e);
+    if (this != parentSelect) {
+        console.log("outside");
+        this.removeAttribute("open");
+        window.removeEventListener("pointerdown", boundClickOutsideHandler);
+    }
+}
+
+export class InputSelect extends Base {
+    constructor() {
+        super();
+
+        /**@private */
+        this._value = null;
+
+        this.shadowRoot.innerHTML += selectTemplateStyle;
+        this.shadowRoot.addEventListener("slotchange", (e) => {
+            /**@type {InputOption} */
+            const firstOpt = this.querySelector("input-opt:first-of-type");
+            const selected = this.shadowRoot.getElementById("selected");
+            selected.textContent = firstOpt.textContent;
+            firstOpt.selected = true;
+            this.value = firstOpt.value;
+        });
+
+        this.shadowRoot.addEventListener("pointerdown", (e) => {
+            if (e.target.id == "selected" && !this.hasAttribute("open")) {
+                this.toggleAttribute("open", true);
+                window.addEventListener(
+                    "pointerdown",
+                    (boundClickOutsideHandler = clickOutsideHandler.bind(this))
+                );
+            }
+
+            if (e.target instanceof InputOption) {
+                window.removeEventListener(
+                    "pointerdown",
+                    boundClickOutsideHandler
+                );
+                this.removeAttribute("open");
+
+                if (this.value == e.target.value) {
+                    return;
+                }
+
+                this.querySelectorAll("input-opt").forEach(
+                    (o) => (o.selected = o == e.target)
+                );
+
+                this.value = e.target.value;
+
+                this.shadowRoot.getElementById("selected").textContent =
+                    e.target.label;
+
+                this.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        });
+    }
+
+    /**@param {string[]} v */
+    set list(v) {
+        const optList = v.map((s, i) => {
+            const opt = document.createElement("input-opt");
+            opt.value = i;
+            opt.label = s;
+            return opt;
+        });
+        this.querySelectorAll("input-opt").forEach((o) => o.remove());
+        this.append(...optList);
+    }
+
+    set value(v) {
+        this._value = v;
+    }
+
+    get value() {
+        return this._value;
+    }
+}
+
+customElements.define("input-select", InputSelect);
+
+const optTemplate = `
+<style></style>
+<slot></slot>
+`;
+
+export class InputOption extends Base {
+    constructor() {
+        super();
+
+        /**@private */
+        this._value = null;
+        /**@private */
+        this._selected = false;
+
+        this.shadowRoot.innerHTML += optTemplate;
+    }
+
+    /**@param {number} v */
+    set value(v) {
+        this._value = v;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    /**@param {string} v */
+    set label(v) {
+        // this._label = v;
+        this.textContent = v;
+    }
+
+    get label() {
+        return this.textContent;
+    }
+
+    /**@param {boolean} bool */
+    set selected(bool) {
+        (bool && this.toggleAttribute("selected", true)) ||
+            this.removeAttribute("selected");
+        this._selected = bool;
+    }
+
+    get selected() {
+        return this._selected;
+    }
+}
+
+customElements.define("input-opt", InputOption);
+
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
 inpRange0.steps = 20;
 inpRange0.value = 0.05;
 
-document.body.appendChild(inpRange0);
+const inpSelect0 = document.createElement("input-select");
+inpSelect0.list = ["cool", "blo", "ok"];
+
+document.body.append(inpRange0, inpSelect0);
 
 document.body.addEventListener("change", (e) => {
     console.log(e.target.value);
 });
+
+// const test = document.createElement("input-opt")
+// test.textContent = "hello"
+// document.body.appendChild(test)
