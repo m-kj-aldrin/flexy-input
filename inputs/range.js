@@ -84,10 +84,12 @@ function clamp(x, min, max) {
  * @param {number} q
  */
 function quantize(x, q) {
-    let d = x / q;
-    x = Math.floor(+d.toPrecision(12));
-    const v = x * q;
-    return +v.toPrecision(12);
+    let v = Math.floor(x * q) / q;
+    return v;
+    // let d = x / q;
+    // x = Math.floor(+d.toPrecision(12));
+    // const v = x * q;
+    // return +v.toPrecision(12);
 }
 
 export class InputRange extends Base {
@@ -103,6 +105,8 @@ export class InputRange extends Base {
         /**@private */
         this._step = 1;
 
+        this._f = 1;
+
         this.shadowRoot.innerHTML += rangeTemplate;
         this.svg = this.shadowRoot.querySelector("svg");
 
@@ -111,23 +115,16 @@ export class InputRange extends Base {
 
             const box = this.svg.getBoundingClientRect();
 
-            let x = clamp(e.clientX - box.x, 0, box.width);
+            let cur = e.clientX - box.x;
+            cur = clamp(cur, 0, box.width);
 
-            const circle = this.svg.querySelector("circle");
-            let currentX = +circle.getAttribute("cx");
-
-            const newValue = x / (box.width - 1);
-
-            if (this.value != newValue) {
-                this.value = newValue;
-            }
+            this.value = cur / box.width;
 
             this.svg.onpointermove = (ee) => {
-                currentX = +circle.getAttribute("cx");
-                x = clamp(ee.clientX - box.x, 0, box.width);
-                if (currentX != x) {
-                    this.value = x / (box.width - 1);
-                }
+                let x = cur + ee.movementX * this._f;
+                x = clamp(x, 0, box.width);
+                this.value = x / box.width;
+                cur = x;
             };
         };
 
@@ -146,9 +143,9 @@ export class InputRange extends Base {
             "change",
             /**@param {InputEvent & {target: InputNumber}} e */
             (e) => {
-                this.value = e.target.value;
-                this.dispatchEvent(new Event("change", { bubbles: true }));
-                e.target.value = this.value;
+                this.value = clamp(e.target.value / this._step, 0, 1);
+                // this.dispatchEvent(new Event("change", { bubbles: true }));
+                // e.target.value = this.value;
             }
         );
     }
@@ -164,9 +161,11 @@ export class InputRange extends Base {
 
     /**@param {number} n */
     set steps(n) {
-        const { min, max } = this._minmax;
-        const rangeStep = (max - min) / n;
-        this._step = rangeStep;
+        // const { min, max } = this._minmax;
+        // const rangeStep = (max - min) / n;
+        // this._step = rangeStep;
+        this._f = 128 / n;
+        this._step = n;
     }
 
     /**@param {number} v */
@@ -175,13 +174,14 @@ export class InputRange extends Base {
         const range = max - min;
         //TODO - ROUNDING ERRORS !
         // const f = quantize(range * v, this._step);
-        const f = clamp(v, min, max);
+        // const f = clamp(v, min, max);
+        const f = quantize(v, this._step);
         if (this._value != f) {
             this._value = f;
             this.svg.querySelector("circle").setAttribute("cx", 128 * f);
             const inpNum = this.shadowRoot.querySelector("input-number");
             inpNum.style.left = `${128 * f}px`;
-            inpNum.value = this._value;
+            inpNum.value = this._value * this._step;
             // this.svg.querySelector("text").setAttribute("dx", 128 * f);
             // this.svg.querySelector("text").textContent = this._value;
             this.dispatchEvent(new Event("input", { bubbles: true }));
