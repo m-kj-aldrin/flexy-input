@@ -1,4 +1,6 @@
-import { InputOption, InputRange, InputSelect, InputSwitch } from "./app";
+import { InputRange } from "./range";
+import { InputOption, InputSelect } from "./select";
+import { InputSwitch } from "./switch";
 
 declare global {
     interface HTMLElementTagNameMap {
