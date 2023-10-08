@@ -21,8 +21,5 @@ const inpNumber0 = document.createElement("input-number");
 document.body.append(inpRange0, inpSelect0, inpSwitch0, inpPicker0, inpNumber0);
 
 document.body.addEventListener("change", (e) => {
-    // console.log(e.target.value);
+    console.log(e.target.value);
 });
-
-
-// Just make them individuall custom elements ..

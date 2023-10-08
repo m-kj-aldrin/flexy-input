@@ -26,8 +26,6 @@ const rangeTemplate = `
         transition-delay: 0ms;
     }
 
-
-
     circle {
         transition: r 200ms ease;
     }
@@ -74,7 +72,6 @@ const rangeTemplate = `
 <input-number></input-number>
 `;
 
-// <text x="0" y="24" font-size="10">hello</text>
 function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
 }
@@ -86,10 +83,6 @@ function clamp(x, min, max) {
 function quantize(x, q) {
     let v = Math.floor(x * q) / q;
     return v;
-    // let d = x / q;
-    // x = Math.floor(+d.toPrecision(12));
-    // const v = x * q;
-    // return +v.toPrecision(12);
 }
 
 export class InputRange extends Base {
@@ -144,8 +137,6 @@ export class InputRange extends Base {
             /**@param {InputEvent & {target: InputNumber}} e */
             (e) => {
                 this.value = clamp(e.target.value / this._step, 0, 1);
-                // this.dispatchEvent(new Event("change", { bubbles: true }));
-                // e.target.value = this.value;
             }
         );
     }
@@ -161,20 +152,12 @@ export class InputRange extends Base {
 
     /**@param {number} n */
     set steps(n) {
-        // const { min, max } = this._minmax;
-        // const rangeStep = (max - min) / n;
-        // this._step = rangeStep;
         this._f = 128 / n;
         this._step = n;
     }
 
     /**@param {number} v */
     set value(v) {
-        const { min, max } = this.minmax;
-        const range = max - min;
-        //TODO - ROUNDING ERRORS !
-        // const f = quantize(range * v, this._step);
-        // const f = clamp(v, min, max);
         const f = quantize(v, this._step);
         if (this._value != f) {
             this._value = f;
@@ -182,8 +165,6 @@ export class InputRange extends Base {
             const inpNum = this.shadowRoot.querySelector("input-number");
             inpNum.style.left = `${128 * f}px`;
             inpNum.value = this._value * this._step;
-            // this.svg.querySelector("text").setAttribute("dx", 128 * f);
-            // this.svg.querySelector("text").textContent = this._value;
             this.dispatchEvent(new Event("input", { bubbles: true }));
         }
     }

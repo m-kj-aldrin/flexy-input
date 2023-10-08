@@ -40,32 +40,10 @@ export class InputNumber extends Base {
                 return;
             }
             if (re.test(e.key)) {
-                // if (e.target.value.indexOf(".") > 0 && e.key == ".") {
-                //     e.preventDefault();
-                // }
                 if (!re2.test(e.key)) {
                     e.preventDefault();
                 }
             }
-
-            if (!isNaN(+e.key)) {
-                // if (e.key == "0" && !e.target.value.length) {
-                //     e.target.value = "0.";
-                //     e.preventDefault();
-                // }
-                // if (!e.target.value.length && e.key != "1") {
-                //     e.target.value = "0.";
-                // }
-                // if (e.target.value.length > this.precision) {
-                //     e.preventDefault();
-                // }
-            }
-
-            // if (e.key == "Backspace" && e.target.value == "0.") {
-            //     e.target.value = "";
-            // }
-
-            // e.target.style.setProperty("--n", e.target.value.length);
         };
 
         /**@type {(e:InputEvent) => void} */
@@ -74,11 +52,6 @@ export class InputNumber extends Base {
         };
 
         this.input.onchange = (e) => {
-            // if (e.target.value > 1) {
-            //     e.target.value = 1;
-            // }
-
-            // e.target.value = parseFloat(e.target.value);
             e.target.style.setProperty("--n", e.target.value.length);
 
             this.dispatchEvent(new Event("change", { bubbles: true }));
