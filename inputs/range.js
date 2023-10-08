@@ -5,6 +5,7 @@ const rangeTemplate = `
     :host{
         cursor: pointer;
         width: max-content;
+        position: relative;
     }
 
     :host(:active){
@@ -41,16 +42,38 @@ const rangeTemplate = `
         display: block;
     }
 
+    input-number {
+        position: absolute;
+        left: 0;
+        overflow: visible;
+    }
+
+    input-number {
+        opacity: 0;
+        transition-delay: 500ms;
+        transition-duration: 325ms;
+        transition-timingfunction: ease;
+        transition-property: opacity;
+    }
+
+    :host(:hover) input-number,
+    :host(:focus-within) input-number{
+        opacity: 1;
+        transition-duration: 125ms;
+        transition-delay: 0ms;
+    }
+
     </style>
     <svg width="128" height="16" tabindex="0">
     <g id="track" transform="translate(0 8)">
         <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
         <circle cx="0" cy="0" r="4" fill="currentColor" />
     </g>
-    <text x="0" y="24" font-size="10">hello</text>
 </svg>
+<input-number></input-number>
 `;
 
+// <text x="0" y="24" font-size="10">hello</text>
 function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
 }
@@ -117,6 +140,11 @@ export class InputRange extends Base {
             this.svg.releasePointerCapture(e.pointerId);
             this.svg.onpointermove = null;
         };
+
+        this.shadowRoot.addEventListener("change", (e) => {
+            this.value = +e.target.value;
+            this.dispatchEvent(new Event("change", { bubbles: true }));
+        });
     }
 
     /**@param {{min:number,max:number}} o */
@@ -138,13 +166,17 @@ export class InputRange extends Base {
     /**@param {number} v */
     set value(v) {
         const { min, max } = this.minmax;
-        const range = max - min;
-        const f = quantize(range * v, this._step);
+        // const range = max - min;
+        // const f = quantize(range * v, this._step);
+        const f = clamp(v, min, max);
         if (this._value != f) {
             this._value = f;
             this.svg.querySelector("circle").setAttribute("cx", 128 * f);
-            this.svg.querySelector("text").setAttribute("dx", 128 * f);
-            this.svg.querySelector("text").textContent = this._value;
+            const inpNum = this.shadowRoot.querySelector("input-number");
+            inpNum.style.left = `${128 * f}px`;
+            inpNum.value = this._value;
+            // this.svg.querySelector("text").setAttribute("dx", 128 * f);
+            // this.svg.querySelector("text").textContent = this._value;
             this.dispatchEvent(new Event("input", { bubbles: true }));
         }
     }

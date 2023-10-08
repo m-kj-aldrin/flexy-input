@@ -2,13 +2,12 @@ import { Base } from "./base.js";
 
 const numberTemplate = `
 <style>
-    div {
-        border: 1px currentColor solid;
+    :host {
+        overflow: visible;
     }
-
     input {
         font-family: inherit;
-        width: calc(var(--n,1) * 1ch);
+        width: calc(var(--n,1) * 1ch + 0.125ch);
         min-width: 1ch;
         text-align: center;
         padding-inline: 0.25ch;
@@ -40,7 +39,7 @@ export class InputNumber extends Base {
                 return;
             }
             if (re.test(e.key)) {
-                console.log(e.target.value.indexOf("."));
+                // console.log(e.target.value.indexOf("."));
                 if (e.target.value.indexOf(".") > 0 && e.key == ".") {
                     // console.log("not accepted", e.key);
                     e.preventDefault();
@@ -80,16 +79,30 @@ export class InputNumber extends Base {
         };
 
         this.input.onchange = (e) => {
+            // e.stopImmediatePropagation();
+
             if (e.target.value > 1) {
                 e.target.value = 1;
             }
 
             e.target.value = parseFloat(e.target.value);
             e.target.style.setProperty("--n", e.target.value.length);
+
+            // this.inpu
+            this.dispatchEvent(new Event("change", { bubbles: true }));
         };
     }
 
+    updateWidth() {
+        this.input.style.setProperty("--n", this.input.value.length);
+    }
+
+    set value(v) {
+        this.input.value = v;
+        this.updateWidth();
+    }
+
     get value() {
-        return this.input.value;
+        return +this.input.value;
     }
 }
