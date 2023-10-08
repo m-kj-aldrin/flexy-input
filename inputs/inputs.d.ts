@@ -1,3 +1,4 @@
+import { InputPicker } from "./picker";
 import { InputRange } from "./range";
 import { InputOption, InputSelect } from "./select";
 import { InputSwitch } from "./switch";
@@ -8,6 +9,7 @@ declare global {
         "input-select": InputSelect;
         "input-opt": InputOption;
         "input-switch": InputSwitch;
+        "input-picker": InputPicker;
     }
     interface HTMLElementEventMap {}
 }

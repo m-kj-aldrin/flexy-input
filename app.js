@@ -10,7 +10,15 @@ inpSelect0.list = ["sine", "tri", "ramp up", "ramp down"];
 
 const inpSwitch0 = document.createElement("input-switch");
 
-document.body.append(inpRange0, inpSelect0, inpSwitch0);
+const inpPicker0 = document.createElement("input-picker");
+inpPicker0.setPickerType({
+    type: HTMLLIElement,
+    fn: (target, inp) => {
+        inp.shadowRoot.querySelector("span").textContent = target.textContent
+    },
+});
+
+document.body.append(inpRange0, inpSelect0, inpSwitch0, inpPicker0);
 
 document.body.addEventListener("change", (e) => {
     console.log(e.target.value);
