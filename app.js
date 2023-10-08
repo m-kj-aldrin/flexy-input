@@ -2,7 +2,7 @@ import "./inputs/index.js";
 
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-// inpRange0.steps = 65536;
+inpRange0.steps = 65536;
 inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");

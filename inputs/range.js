@@ -1,4 +1,5 @@
 import { Base } from "./base.js";
+import { InputNumber } from "./number.js";
 
 const rangeTemplate = `
 <style>
@@ -141,10 +142,15 @@ export class InputRange extends Base {
             this.svg.onpointermove = null;
         };
 
-        this.shadowRoot.addEventListener("change", (e) => {
-            this.value = +e.target.value;
-            this.dispatchEvent(new Event("change", { bubbles: true }));
-        });
+        this.shadowRoot.addEventListener(
+            "change",
+            /**@param {InputEvent & {target: InputNumber}} e */
+            (e) => {
+                this.value = e.target.value;
+                this.dispatchEvent(new Event("change", { bubbles: true }));
+                e.target.value = this.value;
+            }
+        );
     }
 
     /**@param {{min:number,max:number}} o */
@@ -166,7 +172,8 @@ export class InputRange extends Base {
     /**@param {number} v */
     set value(v) {
         const { min, max } = this.minmax;
-        // const range = max - min;
+        const range = max - min;
+        //TODO - ROUNDING ERRORS !
         // const f = quantize(range * v, this._step);
         const f = clamp(v, min, max);
         if (this._value != f) {

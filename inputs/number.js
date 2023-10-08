@@ -30,22 +30,20 @@ export class InputNumber extends Base {
 
         this.shadowRoot.appendChild(this.input);
 
+        this.precision = 18;
+
         const re = new RegExp(/[^\d]/);
         const re2 = new RegExp(/[\.]|Enter|Backspace|ArrowLeft|ArrowRight/);
 
         this.input.onkeydown = (e) => {
-            // console.log(e.key);
             if (e.metaKey) {
                 return;
             }
             if (re.test(e.key)) {
-                // console.log(e.target.value.indexOf("."));
                 if (e.target.value.indexOf(".") > 0 && e.key == ".") {
-                    // console.log("not accepted", e.key);
                     e.preventDefault();
                 }
                 if (!re2.test(e.key)) {
-                    // console.log("not accepted", e.key);
                     e.preventDefault();
                 }
             }
@@ -60,7 +58,7 @@ export class InputNumber extends Base {
                     e.target.value = "0.";
                 }
 
-                if (e.target.value.length > 12) {
+                if (e.target.value.length > this.precision) {
                     e.preventDefault();
                 }
             }
@@ -75,12 +73,9 @@ export class InputNumber extends Base {
         /**@type {(e:InputEvent) => void} */
         this.input.oninput = (e) => {
             e.target.style.setProperty("--n", e.target.value.length);
-            // console.log("inp");
         };
 
         this.input.onchange = (e) => {
-            // e.stopImmediatePropagation();
-
             if (e.target.value > 1) {
                 e.target.value = 1;
             }
@@ -88,7 +83,6 @@ export class InputNumber extends Base {
             e.target.value = parseFloat(e.target.value);
             e.target.style.setProperty("--n", e.target.value.length);
 
-            // this.inpu
             this.dispatchEvent(new Event("change", { bubbles: true }));
         };
     }
