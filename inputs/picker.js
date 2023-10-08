@@ -11,10 +11,20 @@ const pickerTemplate = `
         flex-direction: column;
         align-items: center;
         padding: 2px;
+
+        --w: 12px;
+        --h: 12px;
+        
     }
 
     svg {
         display: block;
+        width: var(--w,16px);
+        height: var(--h,16px);
+    }
+
+    g {
+        transform: translate( calc( var(--w) / 2 ) , calc( var(--h) / 2 ) );
     }
 
     circle {
@@ -22,16 +32,16 @@ const pickerTemplate = `
         transition-duration: 100ms;
     }
 
-    :host([picking]) circle {
-        /*color: blue;*/
+    circle:first-child {
+        r: calc(var(--w)/2.25);
     }
 
     :host([picking]) circle:first-child {
-        r: 6px;
+        r: calc(var(--w)/1.5);
     }
 
     :host([picking]) circle:nth-child(2) {
-        r: 3px;
+        r: calc(var(--w)/4);
     }
 
     span:empty{
@@ -40,9 +50,9 @@ const pickerTemplate = `
 
 </style>
 
-<svg width="16" height="16">
-    <g transform="translate(8 8)">
-        <circle r="4" fill="none" stroke="currentColor" />
+<svg>
+    <g>
+        <circle fill="none" stroke="currentColor" />
         <circle r="0" fill="currentColor" />
     </g>
 </svg>
