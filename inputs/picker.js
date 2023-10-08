@@ -23,15 +23,15 @@ const pickerTemplate = `
     }
 
     :host([picking]) circle {
-        color: blue;
+        /*color: blue;*/
     }
 
     :host([picking]) circle:first-child {
-        r: 12px;
+        r: 6px;
     }
 
     :host([picking]) circle:nth-child(2) {
-        r: 6px;
+        r: 3px;
     }
 
     span:empty{
@@ -40,13 +40,12 @@ const pickerTemplate = `
 
 </style>
 
-<svg width="32" height="32">
-    <g transform="translate(16 16)">
-        <circle r="8" fill="none" stroke="currentColor" />
+<svg width="16" height="16">
+    <g transform="translate(8 8)">
+        <circle r="4" fill="none" stroke="currentColor" />
         <circle r="0" fill="currentColor" />
     </g>
 </svg>
-<span></span>
 `;
 
 let boundPickerHandler;
