@@ -2,7 +2,7 @@ import "./inputs/index.js";
 
 const inpRange0 = document.createElement("input-range");
 inpRange0.minmax = { min: 0, max: 1 };
-inpRange0.steps = 1024;
+inpRange0.steps = 65000;
 inpRange0.value = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
@@ -12,8 +12,8 @@ const inpSwitch0 = document.createElement("input-switch");
 
 const inpPicker0 = document.createElement("input-picker");
 inpPicker0.setPickerType({
-    type: HTMLLIElement,
-    fn: (target, inp) => {},
+  type: HTMLLIElement,
+  fn: (target, inp) => {},
 });
 
 const inpNumber0 = document.createElement("input-number");
@@ -21,5 +21,5 @@ const inpNumber0 = document.createElement("input-number");
 document.body.append(inpRange0, inpSelect0, inpSwitch0, inpPicker0, inpNumber0);
 
 document.body.addEventListener("change", (e) => {
-    console.log(e.target.value);
+  console.log(e.target.value);
 });
