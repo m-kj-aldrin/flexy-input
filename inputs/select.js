@@ -39,10 +39,10 @@ const selectTemplateStyle = `
         transform: translateY(-4px);
 
         opacity: 0;
-        transition-duration: 500ms,100ms;
+        transition-duration: 500ms,150ms;
         transition-timingfunction: ease;
         transition-property: transform,opacity;
-        transition-delay: 50ms,200ms;
+        transition-delay: 0ms,200ms;
     }
 
     :host([open]) #options{

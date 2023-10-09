@@ -1,42 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>inputs</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>inputs</title>
 
-    <script src="app.js" type="module"></script>
+        <script src="app.js" type="module"></script>
 
-    <style>
-      body {
-        font-family: monospace;
-        white-space: nowrap;
+        <style>
+            * {
+                user-select: none;
+                -webkit-user-select: none;
+            }
 
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
+            body {
+                /* transition-timing-function: cubic-bezier(); */
+                font-family: monospace;
+                white-space: nowrap;
 
-      ul {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding: 2px;
-        border: 1px currentColor solid;
-        width: max-content;
-      }
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
 
-      .module {
-        border: 1px currentColor solid;
-        padding: 2px;
-        width: max-content;
-      }
-    </style>
-  </head>
-  <body>
-    <ul>
-      <li class="module">pro</li>
-      <li class="module">lfo</li>
-    </ul>
-  </body>
+            ul {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 2px;
+                border: 1px currentColor solid;
+                width: max-content;
+            }
+
+            .module {
+                border: 1px currentColor solid;
+                padding: 2px;
+                width: max-content;
+            }
+        </style>
+    </head>
+    <body>
+        <ul>
+            <li class="module">pro</li>
+            <li class="module">lfo</li>
+        </ul>
+    </body>
 </html>
