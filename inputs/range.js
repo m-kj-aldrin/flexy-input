@@ -5,7 +5,7 @@ const rangeTemplate = `
 <style>
     :host{
         cursor: pointer;
-        width: max-content;
+        width: 144px;
         position: relative;
     }
 
@@ -71,19 +71,31 @@ const rangeTemplate = `
     }
 
     svg {
+        outline: 1px red solid;
+        --w: 256px;
+        --h: 16px;
+        width: 100%;
+        height: var(--h);
+        padding-inline: 8px;
+
+    }
+
+    path {
     }
 
     </style>
-    <svg width="144" height="16" tabindex="0">
-    <g id="track" transform="translate(8 8)">
-        <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
+    <svg tabindex="0">
+        <g id="track" transform="translate(0 8)">
+        <rect width="100%" height="2" y="-1" rx="4"></rect>
         <circle cx="0" cy="0" r="4" fill="currentColor" />
-        <text dy="-8" id="stepping">1</text>
-    </g>
-</svg>
-<input-number></input-number>
-`;
+            <text dy="-8" id="stepping">1</text>
+        </g>
+    </svg>
+    <input-number></input-number>
+    `;
 
+// <line x1="0" x2="128" stroke="currentColor"></line>
+// <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
 function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
 }
@@ -115,37 +127,43 @@ export class InputRange extends Base {
 
         this.shadowRoot.innerHTML += rangeTemplate;
         this.svg = this.shadowRoot.querySelector("svg");
+        /**@type {DOMRect} */
+        this._box = null;
+        this._w = 0;
 
         this.svg.onpointerdown = (e) => {
             this.svg.setPointerCapture(e.pointerId);
 
             let box = this.svg.getBoundingClientRect();
-            let cur = e.clientX - box.x - 8;
-            cur = clamp(cur, 0, 128);
+            this._box = box;
 
-            this.value = cur / 128;
-
-            let startY = null;
-
-            let stepF = 1;
-            this.svg.querySelector("#stepping").textContent = "1";
+            let w = box.width - 16;
+            this._w = w;
+            let s = this._step < w ? 1 : w / this._step;
+            let x = e.clientX - 8 - 8;
+            x = clamp(x, 0, w);
+            this.value = x / w;
 
             this.svg.onpointermove = (ee) => {
-                if (ee.ctrlKey) {
-                    !startY && (startY = ee.clientY);
-                    let y = ee.clientY - startY;
-                    y *= -1;
-                    let yQ = Math.floor(y / 10) * 4;
-                    yQ = clamp(yQ, 1, 32);
-                    stepF = yQ;
-                    this.svg.toggleAttribute("moving", true);
-                    this.svg.querySelector("#stepping").textContent =
-                        stepF.toString();
-                }
-                let x = cur + ee.movementX * this._f * stepF;
-                x = clamp(x, 0, 128);
-                this.value = x / 128;
-                cur = x;
+                let movement = ee.movementX * s;
+                x = x + movement;
+                x = clamp(x, 0, w);
+                this.value = x / w;
+                // if (ee.ctrlKey) {
+                //     !startY && (startY = ee.clientY);
+                //     let y = ee.clientY - startY;
+                //     y *= -1;
+                //     let yQ = Math.floor(y / 10) * 4;
+                //     yQ = clamp(yQ, 1, 32);
+                //     stepF = yQ;
+                //     this.svg.toggleAttribute("moving", true);
+                //     this.svg.querySelector("#stepping").textContent =
+                //         stepF.toString();
+                // }
+                // let x = cur + ee.movementX * this._f * stepF;
+                // x = clamp(x, 0, 128);
+                // this.value = x / 128;
+                // cur = x;
             };
         };
 
@@ -181,20 +199,23 @@ export class InputRange extends Base {
 
     /**@param {number} n */
     set steps(n) {
-        this._f = 128 / n;
+        // const box = this.svg.getBoundingClientRect();
+        // const w = box.width - 16;
+        // this._f = w / n;
         this._step = n;
     }
 
     /**@param {number} v */
     set value(v) {
         const f = v;
+        console.log(v);
         if (this._value != f) {
             this._value = f;
-            this.svg.querySelector("circle").setAttribute("cx", 128 * f);
-            const inpNum = this.shadowRoot.querySelector("input-number");
-            inpNum.style.left = `${128 * f}px`;
-            inpNum.value = Math.round(this._value * this._step);
-            this.dispatchEvent(new Event("input", { bubbles: true }));
+            this.svg.querySelector("circle").setAttribute("cx", this._w * f);
+            // const inpNum = this.shadowRoot.querySelector("input-number");
+            // inpNum.style.left = `${128 * f}px`;
+            // inpNum.value = Math.round(this._value * this._step);
+            // this.dispatchEvent(new Event("input", { bubbles: true }));
         }
     }
 
