@@ -19,55 +19,69 @@ const numberTemplate = `
 `;
 
 export class InputNumber extends Base {
-    constructor() {
-        super();
+  constructor() {
+    super();
 
-        this.shadowRoot.innerHTML += numberTemplate;
+    this.shadowRoot.innerHTML += numberTemplate;
 
-        /**@private */
-        this.input = document.createElement("input");
-        this.input.type = "text";
+    /**@private */
+    this.input = document.createElement("input");
+    this.input.type = "text";
 
-        this.shadowRoot.appendChild(this.input);
+    this.shadowRoot.appendChild(this.input);
 
-        this.precision = 18;
+    this.precision = 18;
 
-        const re = new RegExp(/[^\d]/);
-        const re2 = new RegExp(/[\.]|Enter|Backspace|ArrowLeft|ArrowRight/);
+    const re = new RegExp(/[^\d]/);
+    const re2 = new RegExp(/[\.]|Enter|Backspace|ArrowLeft|ArrowRight/);
+    const updownRE = new RegExp(/ArrowUp|ArrowDown/);
 
-        this.input.onkeydown = (e) => {
-            if (e.metaKey) {
-                return;
-            }
-            if (re.test(e.key)) {
-                if (!re2.test(e.key)) {
-                    e.preventDefault();
-                }
-            }
-        };
+    this.input.onkeydown = (e) => {
+      if (e.metaKey) return;
+      if (e.ctrlKey && e.key == "a") return;
 
-        /**@type {(e:InputEvent) => void} */
-        this.input.oninput = (e) => {
-            e.target.style.setProperty("--n", e.target.value.length);
-        };
+      if (updownRE.test(e.key)) {
+        if (e.key == "ArrowUp") {
+          e.target.value = +e.target.value + 1;
+        }
+        if (e.key == "ArrowDown") {
+          e.target.value = +e.target.value - 1;
+        }
 
-        this.input.onchange = (e) => {
-            e.target.style.setProperty("--n", e.target.value.length);
+        this.dispatchEvent(new InputEvent("change", { bubbles: true }));
+        // e.preventDefault();
+        // return;
+      }
 
-            this.dispatchEvent(new Event("change", { bubbles: true }));
-        };
-    }
+      if (re.test(e.key)) {
+        if (!re2.test(e.key)) {
+          e.preventDefault();
+        }
+      }
+    };
 
-    updateWidth() {
-        this.input.style.setProperty("--n", this.input.value.length);
-    }
+    /**@type {(e:InputEvent) => void} */
+    this.input.oninput = (e) => {
+      e.target.style.setProperty("--n", e.target.value.length);
+    };
 
-    set value(v) {
-        this.input.value = v;
-        this.updateWidth();
-    }
+    this.input.onchange = (e) => {
+      e.target.style.setProperty("--n", e.target.value.length);
 
-    get value() {
-        return +this.input.value;
-    }
+      this.dispatchEvent(new InputEvent("change", { bubbles: true }));
+    };
+  }
+
+  updateWidth() {
+    this.input.style.setProperty("--n", this.input.value.length);
+  }
+
+  set value(v) {
+    this.input.value = v;
+    this.updateWidth();
+  }
+
+  get value() {
+    return +this.input.value;
+  }
 }
