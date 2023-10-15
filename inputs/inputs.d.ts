@@ -2,6 +2,7 @@ import { InputNumber } from "./number";
 import { InputPicker } from "./picker";
 import { InputRange } from "./range";
 import { InputOption, InputSelect } from "./select";
+import { SlideParent } from "./slide-parent";
 import { InputSwitch } from "./switch";
 
 declare global {
@@ -12,6 +13,7 @@ declare global {
         "input-switch": InputSwitch;
         "input-picker": InputPicker;
         "input-number": InputNumber;
+        "slide-parent": SlideParent;
     }
     interface HTMLElementEventMap {}
 }

@@ -38,12 +38,24 @@
                 padding: 2px;
                 width: max-content;
             }
+
+            html[data-cursor] ::part(cursor) {
+                cursor: inherit;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+
+            html[data-cursor="slide"] * {
+                cursor: ew-resize;
+                user-select: none;
+                -webkit-user-select: none;
+            }
         </style>
     </head>
     <body>
-        <ul>
+        <!-- <ul>
             <li class="module">pro</li>
             <li class="module">lfo</li>
-        </ul>
+        </ul> -->
     </body>
 </html>

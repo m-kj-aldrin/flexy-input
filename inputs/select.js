@@ -81,6 +81,7 @@ let boundClickOutsideHandler;
 function clickOutsideHandler(e) {
     const target = e.target;
     const parentSelect = target.closest("input-select");
+
     if (this != parentSelect) {
         this.removeAttribute("open");
         window.removeEventListener("pointerdown", boundClickOutsideHandler);
@@ -115,6 +116,10 @@ export class InputSelect extends Base {
                     );
                 } else {
                     this.removeAttribute("open");
+                    window.removeEventListener(
+                        "pointerdown",
+                        boundClickOutsideHandler
+                    );
                 }
             }
 
