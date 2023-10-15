@@ -75,7 +75,7 @@ const rangeTemplate = `
     }
 
     svg {
-        outline: 1px currentColor solid;
+        /* outline: 1px currentColor solid; */
         padding-inline: 8px;
         width: 100%;
     }
@@ -118,7 +118,7 @@ export class InputRange extends Base {
         this._value = null;
 
         /**@private */
-        this._minmax = { min: null, max: null };
+        this._minmax = { min: 0, max: 128 };
 
         /**@private */
         this._step = 1;
@@ -153,7 +153,7 @@ export class InputRange extends Base {
 
             this.svg.onpointermove = (ee) => {
                 let ax = ee.clientX - box.x - 8;
-                if (ratio == 1) {
+                if (false) {
                     x = ax;
                 } else {
                     if (this.normValue >= 1 && ax > w + this.range / 2) {

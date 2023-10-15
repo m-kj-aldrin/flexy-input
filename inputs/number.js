@@ -149,7 +149,6 @@ export class InputNumber extends Base {
     set value(v) {
         const input = this.input;
         let newValue = v;
-        // let newValue = Math.min(Math.max(v, this._min), this._max);
 
         if (newValue != this.value) {
             this._changed = true;

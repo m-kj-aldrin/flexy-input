@@ -7,7 +7,7 @@ inpRange0.normValue = 0.75;
 
 const inpRange1 = document.createElement("input-range");
 inpRange1.width = 64;
-inpRange1.minmax = { min: 0, max: 256 };
+inpRange1.minmax = { min: 0, max: 128 };
 inpRange1.normValue = 0.5;
 
 const inpSelect0 = document.createElement("input-select");
