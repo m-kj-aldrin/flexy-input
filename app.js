@@ -51,3 +51,8 @@ bNum.minmax = { min: 512, max: 1024 };
 spB.appendChild(bNum);
 
 document.body.appendChild(spB);
+
+const button0 = document.createElement("input-button");
+button0.textContent = "click";
+
+document.body.appendChild(button0);

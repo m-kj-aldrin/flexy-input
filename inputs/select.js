@@ -23,26 +23,33 @@ const selectTemplateStyle = `
     }
 
     #options {
-        margin-top: 6px;
+        display:none;
+
+        margin-block: 6px;
         min-width: 100%;
         position: absolute;
         left: -1px;
         background-color: white;
         flex-direction: column;
-        display: flex;
         gap: 4px;
         padding: 4px;
         background-color: white;
         border: 1px currentColor solid;
         border-radius: 2px;
         pointer-events: none;
-        transform: translateY(-4px);
+
+        transform: translateY(-2px);
 
         opacity: 0;
-        transition-duration: 500ms,150ms;
+        transition-duration: 250ms,150ms;
         transition-timingfunction: ease;
         transition-property: transform,opacity;
-        transition-delay: 0ms,200ms;
+        transition-delay: 0ms,150ms;
+    }
+
+    #options[direction="up"]{
+        bottom: 100%;
+        transform: translateY(2px);
     }
 
     :host([open]) #options{
@@ -68,7 +75,7 @@ const selectTemplateStyle = `
 
 </style>
 <div id="select" tabindex="0">
-    <div id="selected"></div>
+    <div id="selected" onpointerdown="this.dispatchEvent(new CustomEvent('open',{bubbles:true}))"></div>
     <div id="options">
         <slot></slot>
     </div>
@@ -78,12 +85,21 @@ const selectTemplateStyle = `
 /**@type {typeof clickOutsideHandler} */
 let boundClickOutsideHandler;
 
+/**
+ * @this {InputSelect}
+ * @param {PointerEvent & {target:HTMLElement}} e
+ */
 function clickOutsideHandler(e) {
     const target = e.target;
     const parentSelect = target.closest("input-select");
 
     if (this != parentSelect) {
         this.removeAttribute("open");
+        this.shadowRoot.querySelector("#options").ontransitionend = (te) => {
+            te.target.removeAttribute("direction");
+            te.target.style.removeProperty("display");
+            te.target.ontransitionend = null;
+        };
         window.removeEventListener("pointerdown", boundClickOutsideHandler);
     }
 }
@@ -95,6 +111,9 @@ export class InputSelect extends Base {
         /**@private */
         this._value = null;
 
+        /**@private */
+        this._normValue = null;
+
         this.shadowRoot.innerHTML += selectTemplateStyle;
         this.shadowRoot.addEventListener("slotchange", (e) => {
             /**@type {InputOption} */
@@ -105,47 +124,74 @@ export class InputSelect extends Base {
             this.value = firstOpt.value;
         });
 
-        this.shadowRoot.addEventListener("pointerdown", (e) => {
-            if (e.target.id == "selected") {
-                if (!this.hasAttribute("open")) {
-                    this.toggleAttribute("open", true);
-                    window.addEventListener(
-                        "pointerdown",
-                        (boundClickOutsideHandler =
-                            clickOutsideHandler.bind(this))
-                    );
-                } else {
-                    this.removeAttribute("open");
-                    window.removeEventListener(
-                        "pointerdown",
-                        boundClickOutsideHandler
-                    );
-                }
-            }
-
-            if (e.target instanceof InputOption) {
+        this.addEventListener(
+            "option",
+            /**@param {InputEvent & {target: InputOption}} e */
+            (e) => {
                 window.removeEventListener(
                     "pointerdown",
                     boundClickOutsideHandler
                 );
                 this.removeAttribute("open");
 
-                if (this.value == e.target.value) {
-                    return;
-                }
+                /**@type {HTMLElement} */
+                const options = this.shadowRoot.querySelector("#options");
+                options.ontransitionend = (te) => {
+                    options.removeAttribute("direction");
+                    options.style.removeProperty("display");
+                    options.ontransitionend = null;
+                };
+
+                if (this.value == e.target.value) return;
 
                 this.querySelectorAll("input-opt").forEach(
                     (o) => (o.selected = o == e.target)
                 );
 
                 this.value = e.target.value;
+                this.normValue = e.target.normValue;
 
                 this.shadowRoot.getElementById("selected").textContent =
-                    e.target.label;
+                    e.target.textContent;
 
                 this.dispatchEvent(new Event("change", { bubbles: true }));
-            } else {
             }
+        );
+
+        this.shadowRoot.addEventListener("open", (e) => {
+            /**@type {HTMLElement} */
+            const options = this.shadowRoot.querySelector("#options");
+            options.style.display = "flex";
+
+            requestAnimationFrame(() => {
+                const state = this.toggleAttribute("open");
+
+                if (state) {
+                    window.addEventListener(
+                        "pointerdown",
+                        (boundClickOutsideHandler =
+                            clickOutsideHandler.bind(this))
+                    );
+
+                    const box = options.getBoundingClientRect();
+                    const docHeight = document.documentElement.clientHeight;
+
+                    if (box.y + box.height + 8 > docHeight) {
+                        options.setAttribute("direction", "up");
+                    }
+                } else {
+                    window.removeEventListener(
+                        "pointerdown",
+                        boundClickOutsideHandler
+                    );
+
+                    options.ontransitionend = (te) => {
+                        options.removeAttribute("direction");
+                        options.style.removeProperty("display");
+                        options.ontransitionend = null;
+                    };
+                }
+            });
         });
     }
 
@@ -153,8 +199,8 @@ export class InputSelect extends Base {
     set list(v) {
         const optList = v.map((s, i) => {
             const opt = document.createElement("input-opt");
-            opt.value = i;
-            opt.label = s;
+            opt.value = s;
+            opt.normValue = i;
             return opt;
         });
         this.querySelectorAll("input-opt").forEach((o) => o.remove());
@@ -163,6 +209,14 @@ export class InputSelect extends Base {
 
     set value(v) {
         this._value = v;
+    }
+
+    set normValue(v) {
+        this._normValue = v;
+    }
+
+    get normValue() {
+        return this._normValue;
     }
 
     get value() {
@@ -182,28 +236,37 @@ export class InputOption extends Base {
 
         /**@private */
         this._value = null;
+
+        /**@private */
+        this._normValue = null;
+
         /**@private */
         this._selected = false;
 
         this.shadowRoot.innerHTML += optTemplate;
+
+        this.onpointerdown = (e) => {
+            this.dispatchEvent(new InputEvent("option", { bubbles: true }));
+        };
     }
 
-    /**@param {number} v */
+    /**@param {string} v */
     set value(v) {
         this._value = v;
+        this.textContent = v;
     }
 
     get value() {
         return this._value;
     }
 
-    /**@param {string} v */
-    set label(v) {
-        this.textContent = v;
+    /**@param {number} v */
+    set normValue(v) {
+        this._normValue = v;
     }
 
-    get label() {
-        return this.textContent;
+    get normValue() {
+        return this._normValue;
     }
 
     /**@param {boolean} bool */

@@ -1,3 +1,4 @@
+import { InputButton } from "./button";
 import { InputNumber } from "./number";
 import { InputPicker } from "./picker";
 import { InputRange } from "./range";
@@ -14,6 +15,7 @@ declare global {
         "input-picker": InputPicker;
         "input-number": InputNumber;
         "slide-parent": SlideParent;
+        "input-button": InputButton;
     }
     interface HTMLElementEventMap {}
 }

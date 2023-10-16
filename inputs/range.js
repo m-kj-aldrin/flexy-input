@@ -120,13 +120,6 @@ export class InputRange extends Base {
         /**@private */
         this._minmax = { min: 0, max: 128 };
 
-        /**@private */
-        this._step = 1;
-
-        this._f = 1;
-        /**@type {DOMRect} */
-        this._box = null;
-
         this._width = 128;
 
         this.shadowRoot.innerHTML += rangeTemplate;
@@ -136,7 +129,6 @@ export class InputRange extends Base {
             this.svg.setPointerCapture(e.pointerId);
 
             let box = this.svg.getBoundingClientRect();
-            this._box = box;
 
             let w = this.width;
             let x = 0;
@@ -153,16 +145,13 @@ export class InputRange extends Base {
 
             this.svg.onpointermove = (ee) => {
                 let ax = ee.clientX - box.x - 8;
-                if (false) {
-                    x = ax;
+
+                if (this.normValue >= 1 && ax > w + this.range / 2) {
+                    x = w;
+                } else if (this.normValue <= 0 && ax < -this.range / 2) {
+                    x = 0;
                 } else {
-                    if (this.normValue >= 1 && ax > w + this.range / 2) {
-                        x = w;
-                    } else if (this.normValue <= 0 && ax < -this.range / 2) {
-                        x = 0;
-                    } else {
-                        x = x + ee.movementX * ratio;
-                    }
+                    x = x + ee.movementX * ratio;
                 }
 
                 x = clamp(x, 0, w);
@@ -217,11 +206,6 @@ export class InputRange extends Base {
 
     get minmax() {
         return this._minmax;
-    }
-
-    /**@param {number} n */
-    set steps(n) {
-        // this._step = n;
     }
 
     /**@param {number} v */

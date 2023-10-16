@@ -147,4 +147,8 @@ export class InputPicker extends Base {
     get value() {
         return this._pickedElement;
     }
+
+    get normValue() {
+        return this.value;
+    }
 }

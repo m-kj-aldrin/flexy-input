@@ -1,3 +1,4 @@
+import { InputButton } from "./button.js";
 import { InputNumber } from "./number.js";
 import { InputPicker } from "./picker.js";
 import { InputRange } from "./range.js";
@@ -12,3 +13,4 @@ customElements.define("input-switch", InputSwitch);
 customElements.define("input-picker", InputPicker);
 customElements.define("input-number", InputNumber);
 customElements.define("slide-parent", SlideParent);
+customElements.define("input-button", InputButton);
