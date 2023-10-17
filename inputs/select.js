@@ -213,7 +213,7 @@ export class InputSelect extends Base {
             if (this._state) {
                 options.animate(keyFrames, {
                     fill: "forwards",
-                    duration: 200,
+                    duration: 100,
                 }).onfinish = (ae) => {};
                 options.animate([{ opacity: 0 }, { opacity: 1 }], {
                     duration: 100,
@@ -228,14 +228,14 @@ export class InputSelect extends Base {
                 this.removeAttribute("open");
                 options.animate(keyFrames, {
                     fill: "forwards",
-                    duration: 200,
+                    duration: 300,
                     direction: "reverse",
                 }).onfinish = (ae) => {
                     options.style.removeProperty("bottom");
                 };
                 options.animate([{ opacity: 0 }, { opacity: 1 }], {
                     duration: 100,
-                    delay: 100,
+                    delay: 150,
                     fill: "forwards",
                     direction: "reverse",
                 });
