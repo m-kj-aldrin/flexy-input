@@ -24,6 +24,7 @@ const selectTemplateStyle = `
 
     #options {
         display: flex;
+        z-index: 100;
 
         margin-block: 6px;
         min-width: 100%;
@@ -71,12 +72,15 @@ let boundClickOutsideHandler;
  * @param {PointerEvent & {target:HTMLElement}} e
  */
 function clickOutsideHandler(e) {
-    const target = e.target;
-    const parentSelect = target.closest("input-select");
+    // const target = e.target;
+    // const parentSelect = target.closest("input-select");
 
-    if (this != parentSelect) {
-        this.close();
-    }
+    // console.log(target, parentSelect);
+
+    // if (this != parentSelect) {
+    //     // this.close();
+    // }
+    this.close();
 }
 
 export class InputSelect extends Base {
@@ -166,10 +170,12 @@ export class InputSelect extends Base {
             fill: "forwards",
         });
 
-        window.addEventListener(
-            "pointerdown",
-            (boundClickOutsideHandler = clickOutsideHandler.bind(this))
-        );
+        setTimeout(() => {
+            window.addEventListener(
+                "pointerdown",
+                (boundClickOutsideHandler = clickOutsideHandler.bind(this))
+            );
+        }, 0);
     }
 
     close() {

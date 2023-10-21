@@ -112,7 +112,6 @@ function map(x, inMin, inMax, outMin, outMax) {
 export class InputRange extends Base {
     constructor() {
         super();
-
         /**@private */
         this._value = null;
 
@@ -227,7 +226,6 @@ export class InputRange extends Base {
             this._value = f;
 
             let x = this.normValue * this.width;
-
             this.svg.querySelector("circle").setAttribute("cx", x.toString());
 
             this.shadowRoot.querySelector(

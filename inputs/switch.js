@@ -62,4 +62,8 @@ export class InputSwitch extends Base {
     get normValue() {
         return this._value;
     }
+
+    set normValue(v) {
+        this.value = v;
+    }
 }
