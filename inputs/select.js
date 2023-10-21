@@ -7,7 +7,7 @@ const selectTemplateStyle = `
         -webkit-user-select: none;
     }
     :host{
-        border: 1px currentColor solid;
+        border: 1px #0003 solid;
         display: grid;
         width: max-content;
         border-radius: 2px;
@@ -36,8 +36,11 @@ const selectTemplateStyle = `
         padding: 4px;
         background-color: white;
         border: 1px currentColor solid;
+        border: 1px #0003 solid;
         border-radius: 2px;
         pointer-events: none;
+
+        box-shadow: 0 0 8px 4px hsl(0 0% 0% / 0.025);
 
         opacity: 0;
     }
@@ -47,7 +50,7 @@ const selectTemplateStyle = `
     }
 
     ::slotted(input-opt:hover){
-        outline: 1px currentColor dashed;
+        outline: 1px #0003 dashed;
         outline-offset: 1px;
     }
 

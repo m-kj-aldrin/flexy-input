@@ -19,7 +19,7 @@ const switchTemplate = `
   }
 
   circle {
-    transition: cx 250ms cubic-bezier(1, -0.01, 0, 1.05);
+    transition: cx 200ms cubic-bezier(1, -0.01, 0, 1.05);
   }
 
   :host([open]) circle {

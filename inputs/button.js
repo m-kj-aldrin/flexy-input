@@ -11,6 +11,8 @@ const buttonTemplate = `
         border: 1px currentColor solid;
         border-radius: 2px;
         
+        min-width: 1ch;
+        min-height: 1ch;
         width: max-content;
 
         padding-block: 0.125ch;
@@ -42,7 +44,10 @@ export class InputButton extends Base {
 
         this.shadowRoot.innerHTML += buttonTemplate;
 
-        this.onpointerdown = (e) => {
+        // this.onpointerdown = (e) => {
+        //     this.dispatchEvent(new InputEvent("change", { bubbles: true }));
+        // };
+        this.onpointerup = (e) => {
             this.dispatchEvent(new InputEvent("change", { bubbles: true }));
         };
     }

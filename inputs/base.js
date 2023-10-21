@@ -12,11 +12,5 @@ export class Base extends HTMLElement {
 
         this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML += baseTemplateStyle;
-
-        this.shadowRoot.addEventListener("change", (e) => {
-            // this.dispatchEvent(
-            //     new Event("change", { bubbles: true, cancelable: true })
-            // );
-        });
     }
 }
