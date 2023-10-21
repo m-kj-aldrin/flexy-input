@@ -3,7 +3,8 @@ import { Base } from "./base.js";
 const pickerTemplate = `
 <style>
     :host {
-        border: 1px currentColor solid;
+        border: 1px currentColor dashed;
+        border: none;
         width: max-content;
         cursor: pointer;
 
@@ -48,8 +49,13 @@ const pickerTemplate = `
         display: none;
     }
 
+    #detail:empty{
+        display: none;
+    }
+
 </style>
 
+<span id="detail">-</span>
 <svg>
     <g>
         <circle fill="none" stroke="currentColor" />
@@ -58,6 +64,7 @@ const pickerTemplate = `
 </svg>
 `;
 
+let t;
 let boundPickerHandler;
 let boundEscapeHandler;
 
@@ -67,10 +74,12 @@ let boundEscapeHandler;
  */
 function pickerHandler(e) {
     if (e.target instanceof this.pickerType) {
-        this.pick(e.target);
+        const res = this.pick(e.target);
+        if (!res) return;
         this.removeAttribute("picking");
         window.removeEventListener("keydown", boundEscapeHandler);
         window.removeEventListener("pointerdown", boundPickerHandler);
+        document.documentElement.removeAttribute("data-picking");
     }
 }
 
@@ -83,6 +92,7 @@ function escapeHandler(e) {
         this.removeAttribute("picking");
         window.removeEventListener("keydown", boundEscapeHandler);
         window.removeEventListener("pointerdown", boundPickerHandler);
+        document.documentElement.removeAttribute("data-picking");
     }
 }
 
@@ -97,6 +107,9 @@ export class InputPicker extends Base {
 
         /**@private */
         this._pickedElement = null;
+
+        /**@private */
+        this._rejectList = null;
 
         /**
          * @private
@@ -113,21 +126,31 @@ export class InputPicker extends Base {
 
             this.toggleAttribute("picking", true);
 
-            window.addEventListener(
-                "keydown",
-                (boundEscapeHandler = escapeHandler.bind(this))
-            );
+            if (boundPickerHandler) {
+                window.removeEventListener("pointerdown", boundPickerHandler);
+                window.removeEventListener("keydown", boundEscapeHandler);
+                this != t && t.removeAttribute("picking");
+            }
 
-            window.addEventListener(
-                "pointerdown",
-                (boundPickerHandler = pickerHandler.bind(this))
-            );
+            document.documentElement.setAttribute("data-picking", "true");
+
+            setTimeout(() => {
+                t = this;
+                window.addEventListener(
+                    "pointerdown",
+                    (boundPickerHandler = pickerHandler.bind(this))
+                );
+                window.addEventListener(
+                    "keydown",
+                    (boundEscapeHandler = escapeHandler.bind(this))
+                );
+            }, 0);
         };
     }
 
     /**
      * @template {HTMLElement} T
-     * @param {{type: new (...args: any[]) => T, fn: (target: T, picker: InputPicker) => void}} o
+     * @param {{type: new (...args: any[]) => T, fn: (target: T, picker: InputPicker) => any}} o
      */
     setPickerType({ type, fn }) {
         this._pickerType = type;
@@ -135,9 +158,19 @@ export class InputPicker extends Base {
     }
 
     pick(target) {
+        // console.log(target, this._rejectList[0]());
+        // console.log(target == this._rejectList[0]());
+        if (this._rejectList.some((el) => el() == target)) return;
         this._pickedElement = target;
-        this._pickCallback(target, this);
+        // this._pickCallback(target, this);
         this.dispatchEvent(new Event("change", { bubbles: true }));
+        document.documentElement.removeAttribute("data-picking");
+        return true;
+    }
+
+    /**@param {HTMLElement[]} arr */
+    set rejectList(arr) {
+        this._rejectList = arr;
     }
 
     get pickerType() {
@@ -145,7 +178,8 @@ export class InputPicker extends Base {
     }
 
     get value() {
-        return this._pickedElement;
+        if (!this._pickedElement) return;
+        return this._pickCallback(this._pickedElement, this);
     }
 
     get normValue() {

@@ -23,7 +23,7 @@ const selectTemplateStyle = `
     }
 
     #options {
-        display: flex;
+        display: none;
         z-index: 100;
 
         margin-block: 6px;
@@ -144,6 +144,7 @@ export class InputSelect extends Base {
         this._state = true;
         /**@type {HTMLElement} */
         const options = this.shadowRoot.querySelector("#options");
+        options.style.display = "flex";
         this.toggleAttribute("open", true);
 
         const box = options.getBoundingClientRect();
@@ -203,6 +204,7 @@ export class InputSelect extends Base {
             direction: "reverse",
         }).onfinish = (ae) => {
             options.style.removeProperty("bottom");
+            options.style.display = "none";
         };
 
         options.animate([{ opacity: 0 }, { opacity: 1 }], {
