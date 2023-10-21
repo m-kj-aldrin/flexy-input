@@ -4,17 +4,19 @@ import { InputNumber } from "./number.js";
 const rangeTemplate = `
 <style>
     :host{
-        cursor: pointer;
-        width: 144px;
+        width: max-content;
         position: relative;
+
+        width: 144px;
+        display: flex;
+
+        cursor: pointer;
     }
 
     * {
         user-select: none;
         -webkit-user-select: none;
-    }
-
-    :host(:active){
+        box-sizing: border-box;
     }
 
     svg[moving] text {
@@ -37,19 +39,21 @@ const rangeTemplate = `
         transition: r 200ms ease;
     }
 
-    svg:active circle{
-        r: 5px;
+    :host(:active) circle,:host(:focus) circle{
+        r: 4px;
         fill: none;
         stroke: currentColor;
     }
+
+    :host(:active) input-number::part(input) { }
     
     svg {
         overflow: visible;
-        display: block;
     }
 
     input-number {
         position: absolute;
+        top: 12px;
         left: 0;
         overflow: visible;
     }
@@ -71,45 +75,40 @@ const rangeTemplate = `
     }
 
     svg {
-        outline: 1px red solid;
-        --w: 256px;
-        --h: 16px;
-        width: 100%;
-        height: var(--h);
+        /* outline: 1px currentColor solid; */
         padding-inline: 8px;
-
-    }
-
-    path {
+        width: 100%;
     }
 
     </style>
-    <svg tabindex="0">
-        <g id="track" transform="translate(0 8)">
-        <rect width="100%" height="2" y="-1" rx="4"></rect>
-        <circle cx="0" cy="0" r="4" fill="currentColor" />
-            <text dy="-8" id="stepping">1</text>
-        </g>
-    </svg>
-    <input-number></input-number>
-    `;
+    <svg height="16">
+    <g id="track" transform="translate(0 8)">
+        <rect width="100%" height="2" y="-1"></rect>
+        <circle cx="0" cy="0" r="3" fill="currentColor" />
+        <text dy="-8" id="stepping">1</text>
+    </g>
+</svg>
+<input-number></input-number>
+`;
 
-// <line x1="0" x2="128" stroke="currentColor"></line>
-// <path d="M0,0 h128" stroke="currentColor" line-width="1" stroke-linecap="round" />
 function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
 }
 
 /**
  * @param {number} x
- * @param {number} q
+ * @param {number} inMin
+ * @param {number} inMax
+ * @param {number} outMin
+ * @param {number} outMax
  */
-function quantize(x, q) {
-    let v = Math.floor(x * q) / q;
-    return v;
+function map(x, inMin, inMax, outMin, outMax) {
+    let inRange = inMax - inMin;
+    let w = (x - inMin) / inRange;
+    let outRange = outMax - outMin;
+    return outMin + w * outRange;
 }
 
-// TODO - make x size of slider dynamic
 export class InputRange extends Base {
     constructor() {
         super();
@@ -118,61 +117,55 @@ export class InputRange extends Base {
         this._value = null;
 
         /**@private */
-        this._minmax = { min: null, max: null };
+        this._minmax = { min: 0, max: 128 };
 
-        /**@private */
-        this._step = 1;
-
-        this._f = 1;
+        this._width = 128;
 
         this.shadowRoot.innerHTML += rangeTemplate;
         this.svg = this.shadowRoot.querySelector("svg");
-        /**@type {DOMRect} */
-        this._box = null;
-        this._w = 0;
 
         this.svg.onpointerdown = (e) => {
             this.svg.setPointerCapture(e.pointerId);
 
             let box = this.svg.getBoundingClientRect();
-            this._box = box;
 
-            let w = box.width - 16;
-            this._w = w;
-            let s = this._step < w ? 1 : w / this._step;
-            let x = e.clientX - 8 - 8;
-            x = clamp(x, 0, w);
-            this.value = x / w;
+            let w = this.width;
+            let x = 0;
+            if (!e.shiftKey) {
+                x = e.clientX - box.x - 8;
+                x = clamp(x, 0, w);
+            } else {
+                x = this.normValue * w;
+            }
+
+            this.normValue = x / w;
+
+            let ratio = this._step > w ? w / this._step : 1;
 
             this.svg.onpointermove = (ee) => {
-                let movement = ee.movementX * s;
-                x = x + movement;
+                let ax = ee.clientX - box.x - 8;
+
+                if (this.normValue >= 1 && ax > w + this.range / 2) {
+                    x = w;
+                } else if (this.normValue <= 0 && ax < -this.range / 2) {
+                    x = 0;
+                } else {
+                    x = x + ee.movementX * ratio;
+                }
+
                 x = clamp(x, 0, w);
-                this.value = x / w;
-                // if (ee.ctrlKey) {
-                //     !startY && (startY = ee.clientY);
-                //     let y = ee.clientY - startY;
-                //     y *= -1;
-                //     let yQ = Math.floor(y / 10) * 4;
-                //     yQ = clamp(yQ, 1, 32);
-                //     stepF = yQ;
-                //     this.svg.toggleAttribute("moving", true);
-                //     this.svg.querySelector("#stepping").textContent =
-                //         stepF.toString();
-                // }
-                // let x = cur + ee.movementX * this._f * stepF;
-                // x = clamp(x, 0, 128);
-                // this.value = x / 128;
-                // cur = x;
+                this.normValue = x / w;
             };
         };
 
         let prevVal = null;
 
         this.svg.onpointerup = (e) => {
+            this.style.removeProperty("cursor");
+
             if (prevVal != this.value) {
                 prevVal = this.value;
-                this.dispatchEvent(new Event("change", { bubbles: true }));
+                this.dispatchEvent(new InputEvent("change", { bubbles: true }));
             }
             this.svg.removeAttribute("moving");
             this.svg.releasePointerCapture(e.pointerId);
@@ -183,39 +176,65 @@ export class InputRange extends Base {
             "change",
             /**@param {InputEvent & {target: InputNumber}} e */
             (e) => {
-                this.value = clamp(e.target.value / this._step, 0, 1);
+                this.value = e.target.value;
+                e.target.value = this.value;
+                this.dispatchEvent(new InputEvent("change", { bubbles: true }));
             }
         );
+    }
+
+    set width(v) {
+        this._width = v;
+        this.style.width = `${v + 16}px`;
+    }
+
+    get width() {
+        return this._width;
     }
 
     /**@param {{min:number,max:number}} o */
     set minmax({ min, max }) {
         this._minmax = { min, max };
+        this._step = max - min;
+    }
+
+    get range() {
+        const { min, max } = this._minmax;
+        return max - min;
     }
 
     get minmax() {
         return this._minmax;
     }
 
-    /**@param {number} n */
-    set steps(n) {
-        // const box = this.svg.getBoundingClientRect();
-        // const w = box.width - 16;
-        // this._f = w / n;
-        this._step = n;
+    /**@param {number} v */
+    set normValue(v) {
+        const { min, max } = this._minmax;
+        this.value = map(v, 0, 1, min, max);
+    }
+
+    get normValue() {
+        const { min, max } = this._minmax;
+        return map(this.value, min, max, 0, 1);
     }
 
     /**@param {number} v */
     set value(v) {
-        const f = v;
-        console.log(v);
+        const { min, max } = this._minmax;
+        const f = clamp(v, min, max);
+
         if (this._value != f) {
             this._value = f;
-            this.svg.querySelector("circle").setAttribute("cx", this._w * f);
-            // const inpNum = this.shadowRoot.querySelector("input-number");
-            // inpNum.style.left = `${128 * f}px`;
-            // inpNum.value = Math.round(this._value * this._step);
-            // this.dispatchEvent(new Event("input", { bubbles: true }));
+
+            let x = this.normValue * this.width;
+
+            this.svg.querySelector("circle").setAttribute("cx", x.toString());
+
+            this.shadowRoot.querySelector(
+                "input-number"
+            ).style.left = `${x.toString()}px`;
+
+            this.shadowRoot.querySelector("input-number").value = Math.round(f);
         }
     }
 
