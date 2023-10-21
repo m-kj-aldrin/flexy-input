@@ -56,7 +56,7 @@ const selectTemplateStyle = `
 
 </style>
 <div id="select" tabindex="0">
-    <div id="selected" onpointerdown="this.dispatchEvent(new CustomEvent('open',{bubbles:true}))"></div>
+    <div id="selected" onpointerdown="$E(event,'open')"></div>
     <div id="options">
         <slot></slot>
     </div>
@@ -75,38 +75,9 @@ function clickOutsideHandler(e) {
     const parentSelect = target.closest("input-select");
 
     if (this != parentSelect) {
-        this.removeAttribute("open");
-        const options = this.shadowRoot.querySelector("#options");
-        /**@type {Keyframe[]} */
-        let keyFrames = [
-            {
-                transform: `translateY(${-4}px)`,
-            },
-            {
-                transform: `translateY(0)`,
-            },
-        ];
-
-        options.animate(keyFrames, {
-            fill: "forwards",
-            duration: 200,
-            direction: "reverse",
-        }).onfinish = (ae) => {
-            options.style.removeProperty("bottom");
-        };
-        options.animate([{ opacity: 0 }, { opacity: 1 }], {
-            duration: 100,
-            delay: 100,
-            fill: "forwards",
-            direction: "reverse",
-        });
-
-        this._state = false;
-        window.removeEventListener("pointerdown", boundClickOutsideHandler);
+        this.close();
     }
 }
-
-// TODO - Refactor animation logic
 
 export class InputSelect extends Base {
     constructor() {
@@ -135,38 +106,7 @@ export class InputSelect extends Base {
             "option",
             /**@param {InputEvent & {target: InputOption}} e */
             (e) => {
-                window.removeEventListener(
-                    "pointerdown",
-                    boundClickOutsideHandler
-                );
-                this.removeAttribute("open");
-
-                /**@type {HTMLElement} */
-                const options = this.shadowRoot.querySelector("#options");
-
-                /**@type {Keyframe[]} */
-                let keyFrames = [
-                    {
-                        transform: `translateY(${-4}px)`,
-                    },
-                    {
-                        transform: `translateY(0)`,
-                    },
-                ];
-
-                options.animate(keyFrames, {
-                    fill: "forwards",
-                    duration: 200,
-                    direction: "reverse",
-                }).onfinish = (ae) => {
-                    options.style.removeProperty("bottom");
-                };
-                options.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: 100,
-                    delay: 100,
-                    fill: "forwards",
-                    direction: "reverse",
-                });
+                this.close();
 
                 this._state = false;
 
@@ -187,64 +127,83 @@ export class InputSelect extends Base {
         );
 
         this.shadowRoot.addEventListener("open", (e) => {
-            /**@type {HTMLElement} */
-            const options = this.shadowRoot.querySelector("#options");
-
-            const box = options.getBoundingClientRect();
-            const docHeight = document.documentElement.clientHeight;
-
-            if (box.y + box.height + 8 > docHeight) {
-                options.style.bottom = "100%";
-            }
-
-            /**@type {Keyframe[]} */
-            let keyFrames = [
-                {
-                    transform: `translateY(${-4}px)`,
-                },
-                {
-                    transform: `translateY(0)`,
-                },
-            ];
-
-            this.toggleAttribute("open");
             this._state = !this._state;
 
-            if (this._state) {
-                options.animate(keyFrames, {
-                    fill: "forwards",
-                    duration: 100,
-                }).onfinish = (ae) => {};
-                options.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: 100,
-                    fill: "forwards",
-                });
-
-                window.addEventListener(
-                    "pointerdown",
-                    (boundClickOutsideHandler = clickOutsideHandler.bind(this))
-                );
-            } else {
-                this.removeAttribute("open");
-                options.animate(keyFrames, {
-                    fill: "forwards",
-                    duration: 300,
-                    direction: "reverse",
-                }).onfinish = (ae) => {
-                    options.style.removeProperty("bottom");
-                };
-                options.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: 100,
-                    delay: 150,
-                    fill: "forwards",
-                    direction: "reverse",
-                });
-                window.removeEventListener(
-                    "pointerdown",
-                    boundClickOutsideHandler
-                );
-            }
+            this._state ? this.open() : this.close();
         });
+    }
+
+    open() {
+        this._state = true;
+        /**@type {HTMLElement} */
+        const options = this.shadowRoot.querySelector("#options");
+        this.toggleAttribute("open", true);
+
+        const box = options.getBoundingClientRect();
+        const docHeight = document.documentElement.clientHeight;
+
+        if (box.y + box.height + 8 > docHeight) {
+            options.style.bottom = "100%";
+        }
+
+        /**@type {Keyframe[]} */
+        let keyFrames = [
+            {
+                transform: `translateY(${-4}px)`,
+            },
+            {
+                transform: `translateY(0)`,
+            },
+        ];
+
+        options.animate(keyFrames, {
+            fill: "forwards",
+            duration: 100,
+        }).onfinish = (ae) => {};
+
+        options.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 100,
+            fill: "forwards",
+        });
+
+        window.addEventListener(
+            "pointerdown",
+            (boundClickOutsideHandler = clickOutsideHandler.bind(this))
+        );
+    }
+
+    close() {
+        this._state = false;
+        /**@type {HTMLElement} */
+        const options = this.shadowRoot.querySelector("#options");
+        this.removeAttribute("open");
+
+        /**@type {Keyframe[]} */
+        let keyFrames = [
+            {
+                transform: `translateY(${-4}px)`,
+            },
+            {
+                transform: `translateY(0)`,
+            },
+        ];
+
+        options.animate(keyFrames, {
+            fill: "forwards",
+            duration: 300,
+            direction: "reverse",
+        }).onfinish = (ae) => {
+            options.style.removeProperty("bottom");
+        };
+
+        options.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 100,
+            delay: 150,
+            fill: "forwards",
+            direction: "reverse",
+        });
+
+        window.removeEventListener("pointerdown", boundClickOutsideHandler);
     }
 
     /**@param {string[]} v */

@@ -103,7 +103,6 @@ function clamp(x, min, max) {
  * @param {number} outMax
  */
 function map(x, inMin, inMax, outMin, outMax) {
-    // console.log("inside map: ", x);
     let inRange = inMax - inMin;
     let w = (x - inMin) / inRange;
     let outRange = outMax - outMin;

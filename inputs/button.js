@@ -1,7 +1,12 @@
 import { Base } from "./base.js";
 
 const buttonTemplate = `
+
 <style>
+    :host {
+        display: contents;
+    }
+
     #button {
         border: 1px currentColor solid;
         border-radius: 2px;

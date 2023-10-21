@@ -6,6 +6,24 @@ import { InputOption, InputSelect } from "./select.js";
 import { SlideParent } from "./slide-parent.js";
 import { InputSwitch } from "./switch.js";
 
+/**
+ *
+ * @param {Event} e
+ * @param {string} type
+ * @param {{}} detail
+ */
+window.$E = function (e, type, detail = {}) {
+    e.currentTarget.dispatchEvent(
+        new CustomEvent(type, {
+            bubbles: true,
+            detail: {
+                ...detail,
+                target: e.target,
+            },
+        })
+    );
+};
+
 customElements.define("input-range", InputRange);
 customElements.define("input-select", InputSelect);
 customElements.define("input-opt", InputOption);

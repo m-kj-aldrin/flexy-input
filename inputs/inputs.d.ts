@@ -7,6 +7,9 @@ import { SlideParent } from "./slide-parent";
 import { InputSwitch } from "./switch";
 
 declare global {
+    interface Window {
+        $E: (e: Event, type: string, detail?: {}) => void;
+    }
     interface HTMLElementTagNameMap {
         "input-range": InputRange;
         "input-select": InputSelect;
