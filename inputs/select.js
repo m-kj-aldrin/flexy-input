@@ -7,7 +7,7 @@ const selectTemplateStyle = `
         -webkit-user-select: none;
     }
     :host{
-        border: 1px #0003 solid;
+        border: 1px var(--border-color,currentColor) solid;
         display: grid;
         width: max-content;
         border-radius: 2px;
@@ -36,7 +36,7 @@ const selectTemplateStyle = `
         padding: 4px;
         background-color: white;
         border: 1px currentColor solid;
-        border: 1px #0003 solid;
+        border: 1px var(--border-color,currentColor) solid;
         border-radius: 2px;
         pointer-events: none;
 
@@ -150,9 +150,9 @@ export class InputSelect extends Base {
         const box = options.getBoundingClientRect();
         const docHeight = document.documentElement.clientHeight;
 
-        if (box.y + box.height + 8 > docHeight) {
-            options.style.bottom = "100%";
-        }
+        // if (box.y + box.height + 8 > docHeight) {
+        //     options.style.bottom = "100%";
+        // }
 
         /**@type {Keyframe[]} */
         let keyFrames = [
@@ -203,7 +203,7 @@ export class InputSelect extends Base {
             duration: 300,
             direction: "reverse",
         }).onfinish = (ae) => {
-            options.style.removeProperty("bottom");
+            // options.style.removeProperty("bottom");
             options.style.display = "none";
         };
 

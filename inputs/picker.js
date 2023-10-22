@@ -9,8 +9,9 @@ const pickerTemplate = `
         cursor: pointer;
 
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
+        gap: 4px;
         padding: 2px;
 
         --w: 12px;
@@ -168,7 +169,7 @@ export class InputPicker extends Base {
         return true;
     }
 
-    /**@param {HTMLElement[]} arr */
+    /**@param {()=>HTMLElement[]} arr */
     set rejectList(arr) {
         this._rejectList = arr;
     }
