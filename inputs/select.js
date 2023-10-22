@@ -60,7 +60,7 @@ const selectTemplateStyle = `
 
 </style>
 <div id="select" tabindex="0">
-    <div id="selected" onpointerdown="$E(event,'open')"></div>
+    <div id="selected" onpointerup="$E(event,'open')"></div>
     <div id="options">
         <slot></slot>
     </div>

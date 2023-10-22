@@ -8,7 +8,7 @@ const buttonTemplate = `
     }
 
     #button {
-        border: 1px currentColor solid;
+        border: 1px var(--border-color) solid;
         border-radius: 2px;
         
         min-width: 1ch;
@@ -50,13 +50,25 @@ export class InputButton extends Base {
         this.onpointerup = (e) => {
             this.dispatchEvent(new InputEvent("change", { bubbles: true }));
         };
+
+        /**@private */
+        this._value = null;
     }
 
     get normValue() {
-        return true;
+        return this._value;
+    }
+
+    /**@param {any} v */
+    set value(v) {
+        this._value = v;
+    }
+
+    set normValue(v) {
+        this.value = v;
     }
 
     get value() {
-        return true;
+        return this._value;
     }
 }
