@@ -43,7 +43,7 @@ export class InputSwitch extends Base {
         /**@private */
         this._value = null;
 
-        this.onpointerdown = (e) => {
+        this.onpointerup = (e) => {
             this.toggleAttribute("open");
             this.value = this.hasAttribute("open");
             this.dispatchEvent(new Event("change", { bubbles: true }));

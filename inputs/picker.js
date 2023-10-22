@@ -133,7 +133,10 @@ export class InputPicker extends Base {
                 this != t && t.removeAttribute("picking");
             }
 
-            document.documentElement.setAttribute("data-picking", "true");
+            document.documentElement.setAttribute(
+                "data-picking",
+                this._pickerType.name
+            );
 
             setTimeout(() => {
                 t = this;

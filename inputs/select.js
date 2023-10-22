@@ -77,13 +77,11 @@ let boundClickOutsideHandler;
 function clickOutsideHandler(e) {
     // const target = e.target;
     // const parentSelect = target.closest("input-select");
-
     // console.log(target, parentSelect);
-
     // if (this != parentSelect) {
     //     // this.close();
     // }
-    this.close();
+    // this.close();
 }
 
 export class InputSelect extends Base {
@@ -248,6 +246,9 @@ export class InputSelect extends Base {
 
 const optTemplate = `
 <style>
+    :host {
+        background-color: white;
+    }
 </style>
 <slot></slot>
 `;
@@ -267,7 +268,7 @@ export class InputOption extends Base {
 
         this.shadowRoot.innerHTML += optTemplate;
 
-        this.onpointerdown = (e) => {
+        this.onpointerup = (e) => {
             this.dispatchEvent(new InputEvent("option", { bubbles: true }));
         };
     }
