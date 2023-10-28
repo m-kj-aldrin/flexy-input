@@ -81,7 +81,7 @@ function clickOutsideHandler(e) {
     // if (this != parentSelect) {
     //     // this.close();
     // }
-    // this.close();
+    this.close();
 }
 
 export class InputSelect extends Base {
@@ -98,14 +98,14 @@ export class InputSelect extends Base {
         this._state = false;
 
         this.shadowRoot.innerHTML += selectTemplateStyle;
-        this.shadowRoot.addEventListener("slotchange", (e) => {
-            /**@type {InputOption} */
-            const firstOpt = this.querySelector("input-opt:first-of-type");
-            const selected = this.shadowRoot.getElementById("selected");
-            selected.textContent = firstOpt.textContent;
-            firstOpt.selected = true;
-            this.value = firstOpt.value;
-        });
+        // this.shadowRoot.addEventListener("slotchange", (e) => {
+        //     /**@type {InputOption} */
+        //     const firstOpt = this.querySelector("input-opt:first-of-type");
+        //     const selected = this.shadowRoot.getElementById("selected");
+        //     selected.textContent = firstOpt.textContent;
+        //     firstOpt.selected = true;
+        //     this.value = firstOpt.value;
+        // });
 
         this.addEventListener(
             "option",
@@ -224,8 +224,18 @@ export class InputSelect extends Base {
             return opt;
         });
         this.querySelectorAll("input-opt").forEach((o) => o.remove());
+
         this.append(...optList);
+
+        /**@type {InputOption} */
+        const firstOpt = this.querySelector("input-opt:first-of-type");
+        const selected = this.shadowRoot.getElementById("selected");
+        selected.textContent = firstOpt.textContent;
+        firstOpt.selected = true;
+        this.value = firstOpt.value;
     }
+
+    select(v) {}
 
     set value(v) {
         this._value = v;
@@ -233,6 +243,17 @@ export class InputSelect extends Base {
 
     set normValue(v) {
         this._normValue = v;
+
+        let children = this.children;
+
+        for (const child of children) {
+            if (child.normValue == v) {
+                // console.log(child.value);
+                this.value = child.value;
+                this.shadowRoot.getElementById("selected").textContent =
+                    this.value;
+            }
+        }
     }
 
     get normValue() {

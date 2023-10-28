@@ -110,6 +110,9 @@ export class InputPicker extends Base {
         this._pickedElement = null;
 
         /**@private */
+        this._staticValue = null;
+
+        /**@private */
         this._rejectList = null;
 
         /**
@@ -181,8 +184,13 @@ export class InputPicker extends Base {
         return this._pickerType;
     }
 
+    set value(v) {
+        this._staticValue = v;
+        this.shadowRoot.getElementById("detail").innerText = v;
+    }
+
     get value() {
-        if (!this._pickedElement) return;
+        if (!this._pickedElement) return this._staticValue;
         return this._pickCallback(this._pickedElement, this);
     }
 
