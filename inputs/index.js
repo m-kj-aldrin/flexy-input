@@ -1,10 +1,10 @@
-import { InputButton } from "./button.js";
-import { InputNumber } from "./number.js";
-import { InputPicker } from "./picker.js";
-import { InputRange } from "./range.js";
-import { InputOption, InputSelect } from "./select.js";
-import { SlideParent } from "./slide-parent.js";
-import { InputSwitch } from "./switch.js";
+import { InputButton } from "./button/button.js";
+import { InputNumber } from "./number/number.js";
+import { InputPicker } from "./picker/picker.js";
+import { InputRange } from "./range/range.js";
+import { InputOption, InputSelect } from "./select/select.js";
+import { SlideParent } from "./slide-parent/slide-parent.js";
+import { InputSwitch } from "./switch/switch.js";
 
 /**
  *

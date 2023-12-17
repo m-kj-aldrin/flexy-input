@@ -1,30 +1,5 @@
-import { Base } from "./base.js";
-
-const numberTemplate = `
-<style>
-    html[data-cursor] input {
-        cursor: none;
-        color: red;
-    }
-
-    :host {
-        overflow: visible;
-    }
-
-    input {
-        font-family: inherit;
-        width: calc(var(--n,1) * 1ch + 0.125ch);
-        min-width: 1ch;
-        text-align: center;
-        padding-inline: 0.25ch;
-        border: none;
-        border-bottom: 1px currentColor solid;
-        overflow: visible;
-        font-size:inherit;
-        color: currentColor;
-    }
-</style>
-`;
+import { Base } from "../base.js";
+import numberTemplate from "./number.component.html?inline";
 
 const digitRE = new RegExp(/\d/);
 const leftRightRE = new RegExp(/ArrowLeft|ArrowRight|Tab/);
@@ -38,8 +13,6 @@ function keyDown(e) {
     if (e.key == "a" && (e.ctrlKey || e.metaKey)) {
         return;
     }
-
-    // console.log(e.key);
 
     if (leftRightRE.test(e.key)) {
         return;

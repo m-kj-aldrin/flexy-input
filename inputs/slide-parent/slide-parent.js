@@ -1,9 +1,9 @@
-import { Base } from "./base.js";
-import { InputNumber } from "./number.js";
+import { Base } from "../base.js";
+import { InputNumber } from "../number/number.js";
+import slideTemplate from "./slide-parent.component.html?inline"
 
-const slideTemplate = `
-<slot></slot>
-`;
+// const slideTemplate = `
+// `;
 
 /**
  * @this {SlideParent}

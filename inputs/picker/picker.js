@@ -1,69 +1,9 @@
-import { Base } from "./base.js";
+import { Base } from "../base.js";
+import pickerTemplate from "./picker.component.html?inline"
 
-const pickerTemplate = `
-<style>
-    :host {
-        border: 1px currentColor dashed;
-        border: none;
-        width: max-content;
-        cursor: pointer;
+// const pickerTemplate = `
 
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
-        padding: 2px;
-
-        --w: 12px;
-        --h: 12px;
-        
-    }
-
-    svg {
-        display: block;
-        width: var(--w,16px);
-        height: var(--h,16px);
-    }
-
-    g {
-        transform: translate( calc( var(--w) / 2 ) , calc( var(--h) / 2 ) );
-    }
-
-    circle {
-        transition-property: r;
-        transition-duration: 100ms;
-    }
-
-    circle:first-child {
-        r: calc(var(--w)/2.25);
-    }
-
-    :host([picking]) circle:first-child {
-        r: calc(var(--w)/1.5);
-    }
-
-    :host([picking]) circle:nth-child(2) {
-        r: calc(var(--w)/4);
-    }
-
-    span:empty{
-        display: none;
-    }
-
-    #detail:empty{
-        display: none;
-    }
-
-</style>
-
-<span id="detail">-</span>
-<svg>
-    <g>
-        <circle fill="none" stroke="currentColor" />
-        <circle r="0" fill="currentColor" />
-    </g>
-</svg>
-`;
+// `;
 
 let t;
 let boundPickerHandler;

@@ -1,0 +1,71 @@
+<style>
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    :host {
+        border: 1px currentColor solid;
+    }
+    :host(:focus-within) {
+        outline: 1px var(--color-primary) solid;
+        outline-offset: 1px;
+    }
+
+    #select:focus {
+        outline: none;
+    }
+
+    #select {
+        position: relative;
+        cursor: pointer;
+    }
+
+    #selected {
+        white-space: nowrap;
+        padding-inline: 0.4ch;
+        padding-block: 0.4ch;
+    }
+
+    #options {
+        display: none;
+        z-index: 100;
+
+        margin-block: 6px;
+        min-width: 100%;
+        position: absolute;
+        left: -1px;
+        background-color: var(--color-white);
+        flex-direction: column;
+        gap: 4px;
+        padding: 4px;
+        background-color: var(--color-white);
+        border: 1px currentColor solid;
+        border: 1px currentColor solid;
+        border-radius: 2px;
+        pointer-events: none;
+
+        box-shadow: var(--shadow-0);
+
+        opacity: 0;
+    }
+
+    :host([open]) #options {
+        pointer-events: unset;
+    }
+
+    ::slotted(input-opt:hover) {
+        outline: 1px #0003 dashed;
+        outline-offset: 1px;
+    }
+
+    ::slotted(input-opt[selected]) {
+        display: none;
+    }
+</style>
+<div id="select" tabindex="0">
+    <div id="selected" onpointerup="$E(event,'open')"></div>
+    <!-- <button id="selected" onclick="$E(event,'open')"></button> -->
+    <div id="options">
+        <slot></slot>
+    </div>
+</div>

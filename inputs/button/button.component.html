@@ -1,0 +1,40 @@
+<style>
+    :host {
+        display: contents;
+    }
+
+    button {
+        cursor: pointer;
+        padding-inline: 0.4ch;
+        padding-block: 0.4ch;
+
+        --color: var(--color-black);
+
+        color: var(--color);
+        background-color: transparent;
+        border-color: var(--color);
+        line-height: inherit;
+    }
+
+    button:where(:active, [active]) {
+        background-color: var(--color);
+        color: var(--color-white);
+    }
+
+    :where(button) {
+        font-family: inherit;
+        font-size: inherit;
+        color: inherit;
+        border: 1px currentColor solid;
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    :where(button):focus {
+        outline: 1px var(--color-primary) solid;
+        outline-offset: 1px;
+    }
+</style>
+<button>
+    <slot></slot>
+</button>

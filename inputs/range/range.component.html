@@ -1,0 +1,93 @@
+<style>
+    :host {
+        width: max-content;
+        position: relative;
+
+        width: 144px;
+        display: flex;
+
+        cursor: ew-resize;
+
+        margin-inline-start: -3px;
+    }
+
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+        box-sizing: border-box;
+    }
+
+    svg[moving] text {
+        opacity: 1;
+    }
+
+    text {
+        opacity: 0;
+        transition-delay: 500ms;
+        transition-duration: 325ms;
+        transition-timingfunction: ease;
+        transition-property: opacity;
+    }
+
+    :host(:hover) text {
+        transition-delay: 0ms;
+    }
+
+    circle {
+        transition: r 200ms ease;
+        transform: translateX(calc(var(--x, 0) * 100%));
+    }
+
+    :host(:active) circle,
+    :host(:focus) circle {
+        r: 4px;
+        fill: none;
+        stroke: currentColor;
+    }
+
+    :host(:active) input-number::part(input) {
+    }
+
+    svg {
+        overflow: visible;
+    }
+
+    input-number {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        overflow: visible;
+    }
+
+    input-number {
+        left: calc((100% - 16px) * var(--x, 0));
+        opacity: 0;
+        transition-delay: 500ms;
+        transition-duration: 325ms;
+        transition-timingfunction: ease;
+        transition-property: opacity;
+    }
+
+    :host(:hover) input-number,
+    :host(:focus-within) input-number {
+        opacity: 1;
+        transition-duration: 125ms;
+        transition-delay: 0ms;
+    }
+
+    svg {
+        padding-inline: 8px;
+        width: 100%;
+    }
+
+    #track {
+    }
+</style>
+<svg height="16">
+    <g id="track" transform="translate(0 8)">
+        <rect width="100%" height="2" y="-1" fill="currentColor"></rect>
+        <circle cx="0" cy="0" r="3" fill="currentColor" />
+        <text dy="-8" id="stepping">1</text>
+    </g>
+</svg>
+<input-number></input-number>

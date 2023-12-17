@@ -1,10 +1,10 @@
-import { InputButton } from "./button";
-import { InputNumber } from "./number";
-import { InputPicker } from "./picker";
-import { InputRange } from "./range";
-import { InputOption, InputSelect } from "./select";
-import { SlideParent } from "./slide-parent";
-import { InputSwitch } from "./switch";
+import { InputButton } from "./button/button";
+import { InputNumber } from "./number/number";
+import { InputPicker } from "./picker/picker";
+import { InputRange } from "./range/range";
+import { InputOption, InputSelect } from "./select/select";
+import { SlideParent } from "./slide-parent/slide-parent";
+import { InputSwitch } from "./switch/switch";
 
 declare global {
     interface Window {

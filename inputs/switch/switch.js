@@ -1,38 +1,5 @@
-import { Base } from "./base.js";
-
-const switchTemplate = `
-<style>
-  :host {
-    display: grid;
-    width: max-content;
-    place-content: center;
-    cursor: pointer;
-    margin-block: 4px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px currentColor solid;
-  }
-
-  svg {
-    padding: 1.5px;
-    display: block;
-  }
-
-  circle {
-    transition: cx 200ms cubic-bezier(1, -0.01, 0, 1.05);
-  }
-
-  :host([open]) circle {
-    cx: 12px;
-  }
-</style>
-
-<svg width="16" height="8" tabindex="0">
-  <g transform="translate(0 4)">
-    <circle cx="4" r="4" />
-  </g>
-</svg>
-`;
+import { Base } from "../base.js";
+import switchTemplate from "./switch.component.html?inline"
 
 export class InputSwitch extends Base {
     constructor() {

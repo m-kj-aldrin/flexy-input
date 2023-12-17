@@ -1,101 +1,10 @@
-import { Base } from "./base.js";
-import { InputNumber } from "./number.js";
+import { Base } from "../base.js";
+import { InputNumber } from "../number/number.js";
+import rangeTemplate from "./range.component.html?inline";
 
-const rangeTemplate = `
-<style>
-    :host{
-        width: max-content;
-        position: relative;
+// const rangeTemplate = `
 
-        width: 144px;
-        display: flex;
-
-        cursor: ew-resize;
-
-        margin-inline-start: -3px;
-    }
-
-    * {
-        user-select: none;
-        -webkit-user-select: none;
-        box-sizing: border-box;
-    }
-
-    svg[moving] text {
-        opacity: 1;
-    }
-
-    text {
-        opacity: 0;
-        transition-delay: 500ms;
-        transition-duration: 325ms;
-        transition-timingfunction: ease;
-        transition-property: opacity;
-    }
-
-    :host(:hover) text{
-        transition-delay: 0ms;
-    }
-
-    circle {
-        transition: r 200ms ease;
-        transform: translateX(calc(var(--x,0)*100%));
-    }
-
-    :host(:active) circle,:host(:focus) circle{
-        r: 4px;
-        fill: none;
-        stroke: currentColor;
-    }
-
-    :host(:active) input-number::part(input) { }
-    
-    svg {
-        overflow: visible;
-    }
-
-    input-number {
-        position: absolute;
-        top: 12px;
-        left: 0;
-        overflow: visible;
-    }
-
-    input-number {
-        left: calc( (100% - 16px) * var(--x,0) );
-        opacity: 0;
-        transition-delay: 500ms;
-        transition-duration: 325ms;
-        transition-timingfunction: ease;
-        transition-property: opacity;
-    }
-
-    :host(:hover) input-number,
-    :host(:focus-within) input-number{
-        opacity: 1;
-        transition-duration: 125ms;
-        transition-delay: 0ms;
-    }
-
-    svg {
-        padding-inline: 8px;
-        width: 100%;
-    }
-
-    #track{
-
-    }
-
-    </style>
-    <svg height="16">
-    <g id="track" transform="translate(0 8)">
-        <rect width="100%" height="2" y="-1" fill="currentColor"></rect>
-        <circle cx="0" cy="0" r="3" fill="currentColor" />
-        <text dy="-8" id="stepping">1</text>
-    </g>
-</svg>
-<input-number></input-number>
-`;
+// `;
 
 function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
@@ -153,6 +62,8 @@ export class InputRange extends HTMLElement {
 
             let ratio = this._step > w ? w / this._step : 1;
 
+            this.dispatchEvent(new InputEvent("input", { bubbles: true }));
+
             this.svg.onpointermove = (ee) => {
                 let ax = ee.clientX - box.x - 8;
 
@@ -166,6 +77,8 @@ export class InputRange extends HTMLElement {
 
                 x = clamp(x, 0, w);
                 this.normValue = x / w;
+
+                this.dispatchEvent(new InputEvent("input", { bubbles: true }));
             };
         };
 
@@ -264,6 +177,14 @@ export class InputRange extends HTMLElement {
             let v = this.getAttribute("norm-value");
             if (v) {
                 this.normValue = +v;
+            }
+            let mm = this.getAttribute("min-max");
+            if (mm) {
+                let [min, max] = mm.split(" ");
+                this.minmax = {
+                    min: +min,
+                    max: +max,
+                };
             }
 
             this.#_init = true;

@@ -1,71 +1,10 @@
-import { Base } from "./base.js";
+import { Base } from "../base.js";
+import selectTemplateStyle from "./select.component.html?inline";
+import optTemplate from "./opt.component.html?inline";
 
-const selectTemplateStyle = `
-<style>
-    *{
-        user-select: none;
-        -webkit-user-select: none;
-    }
-    :host{
-        border: 1px var(--border-color,currentColor) solid;
-        display: grid;
-        width: max-content;
-        border-radius: 2px;
-    }
+// const selectTemplateStyle = `
 
-    #select{
-        position: relative;
-        cursor: pointer;
-    }
-
-    #selected{
-        padding: 2px;
-    }
-
-    #options {
-        display: none;
-        z-index: 100;
-
-        margin-block: 6px;
-        min-width: 100%;
-        position: absolute;
-        left: -1px;
-        background-color: white;
-        flex-direction: column;
-        gap: 4px;
-        padding: 4px;
-        background-color: white;
-        border: 1px currentColor solid;
-        border: 1px var(--border-color,currentColor) solid;
-        border-radius: 2px;
-        pointer-events: none;
-
-        box-shadow: 0 0 8px 4px hsl(0 0% 0% / 0.025);
-
-        opacity: 0;
-    }
-
-    :host([open]) #options {
-        pointer-events: unset;
-    }
-
-    ::slotted(input-opt:hover){
-        outline: 1px #0003 dashed;
-        outline-offset: 1px;
-    }
-
-    ::slotted(input-opt[selected]){
-        display: none;
-    }
-
-</style>
-<div id="select" tabindex="0">
-    <div id="selected" onpointerup="$E(event,'open')"></div>
-    <div id="options">
-        <slot></slot>
-    </div>
-</div>
-`;
+// `;
 
 /**@type {typeof clickOutsideHandler} */
 let boundClickOutsideHandler;
@@ -75,16 +14,12 @@ let boundClickOutsideHandler;
  * @param {PointerEvent & {target:HTMLElement}} e
  */
 function clickOutsideHandler(e) {
-    // const target = e.target;
-    // const parentSelect = target.closest("input-select");
-    // console.log(target, parentSelect);
-    // if (this != parentSelect) {
-    //     // this.close();
-    // }
+    if (e.composedPath().some((el) => el == this)) return;
     this.close();
 }
 
 export class InputSelect extends Base {
+    #_init = false;
     constructor() {
         super();
 
@@ -114,7 +49,6 @@ export class InputSelect extends Base {
                 this.close();
 
                 this._state = false;
-
                 if (this.value == e.target.value) return;
 
                 this.querySelectorAll("input-opt").forEach(
@@ -215,6 +149,25 @@ export class InputSelect extends Base {
         window.removeEventListener("pointerdown", boundClickOutsideHandler);
     }
 
+    connectedCallback() {
+        if (!this.#_init) {
+            // setTimeout(() => {
+            /**@type {InputOption} */
+            const firstOpt = this.querySelector("input-opt:first-of-type");
+            const selected = this.shadowRoot.getElementById("selected");
+            selected.textContent = firstOpt.textContent;
+            firstOpt.selected = true;
+            // this.value = firstOpt.value;
+            this.value = 0;
+            this.normValue = 0;
+
+            // console.log(firstOpt.normValue);
+            // }, 0);
+
+            this.#_init = true;
+        }
+    }
+
     /**@param {string[]} v */
     set list(v) {
         const optList = v.map((s, i) => {
@@ -265,16 +218,12 @@ export class InputSelect extends Base {
     }
 }
 
-const optTemplate = `
-<style>
-    :host {
-        background-color: white;
-    }
-</style>
-<slot></slot>
-`;
+// const optTemplate = `
+
+// `;
 
 export class InputOption extends Base {
+    #_init = false;
     constructor() {
         super();
 
@@ -292,6 +241,19 @@ export class InputOption extends Base {
         this.onpointerup = (e) => {
             this.dispatchEvent(new InputEvent("option", { bubbles: true }));
         };
+    }
+
+    connectedCallback() {
+        if (!this.#_init) {
+            let norm_value = this.getAttribute("norm-value");
+            if (norm_value) {
+                this.normValue = +norm_value;
+            }
+            if (this.textContent) {
+                this._value = this.textContent;
+            }
+            this.#_init = true;
+        }
     }
 
     /**@param {string} v */
