@@ -20,12 +20,14 @@ const numberTemplate = `
         border: none;
         border-bottom: 1px currentColor solid;
         overflow: visible;
+        font-size:inherit;
+        color: currentColor;
     }
 </style>
 `;
 
 const digitRE = new RegExp(/\d/);
-const leftRightRE = new RegExp(/ArrowLeft|ArrowRight/);
+const leftRightRE = new RegExp(/ArrowLeft|ArrowRight|Tab/);
 const upDownRE = new RegExp(/ArrowUp|ArrowDown/);
 
 /**
@@ -36,6 +38,8 @@ function keyDown(e) {
     if (e.key == "a" && (e.ctrlKey || e.metaKey)) {
         return;
     }
+
+    // console.log(e.key);
 
     if (leftRightRE.test(e.key)) {
         return;

@@ -10,7 +10,9 @@ const rangeTemplate = `
         width: 144px;
         display: flex;
 
-        cursor: pointer;
+        cursor: ew-resize;
+
+        margin-inline-start: -3px;
     }
 
     * {
@@ -37,6 +39,7 @@ const rangeTemplate = `
 
     circle {
         transition: r 200ms ease;
+        transform: translateX(calc(var(--x,0)*100%));
     }
 
     :host(:active) circle,:host(:focus) circle{
@@ -59,7 +62,7 @@ const rangeTemplate = `
     }
 
     input-number {
-        transform: translateX(8px);
+        left: calc( (100% - 16px) * var(--x,0) );
         opacity: 0;
         transition-delay: 500ms;
         transition-duration: 325ms;
@@ -75,15 +78,18 @@ const rangeTemplate = `
     }
 
     svg {
-        /* outline: 1px currentColor solid; */
         padding-inline: 8px;
         width: 100%;
+    }
+
+    #track{
+
     }
 
     </style>
     <svg height="16">
     <g id="track" transform="translate(0 8)">
-        <rect width="100%" height="2" y="-1"></rect>
+        <rect width="100%" height="2" y="-1" fill="currentColor"></rect>
         <circle cx="0" cy="0" r="3" fill="currentColor" />
         <text dy="-8" id="stepping">1</text>
     </g>
@@ -109,14 +115,20 @@ function map(x, inMin, inMax, outMin, outMax) {
     return outMin + w * outRange;
 }
 
-export class InputRange extends Base {
+export class InputRange extends HTMLElement {
+    #_init = false;
+
     constructor() {
         super();
+        this.attachShadow({ mode: "open" });
+
         /**@private */
         this._value = null;
 
         /**@private */
-        this._minmax = { min: 0, max: 128 };
+        this._minmax = { min: 0, max: 512 };
+
+        this._step = 512;
 
         this._width = 128;
 
@@ -188,7 +200,7 @@ export class InputRange extends Base {
     }
 
     get width() {
-        return this._width;
+        return +this.style.width.replace("px", "") - 16;
     }
 
     /**@param {{min:number,max:number}} o */
@@ -226,11 +238,14 @@ export class InputRange extends Base {
             this._value = f;
 
             let x = this.normValue * this.width;
-            this.svg.querySelector("circle").setAttribute("cx", x.toString());
 
-            this.shadowRoot.querySelector(
-                "input-number"
-            ).style.left = `${x.toString()}px`;
+            this.svg
+                .querySelector("circle")
+                .style.setProperty("--x", this.normValue.toString());
+
+            this.shadowRoot
+                .querySelector("input-number")
+                .style.setProperty("--x", this.normValue.toString());
 
             this.shadowRoot.querySelector("input-number").value = Math.round(f);
         }
@@ -238,5 +253,20 @@ export class InputRange extends Base {
 
     get value() {
         return this._value;
+    }
+
+    connectedCallback() {
+        if (!this.#_init) {
+            let w = this.getAttribute("width");
+            if (w) {
+                this.width = +w;
+            }
+            let v = this.getAttribute("norm-value");
+            if (v) {
+                this.normValue = +v;
+            }
+
+            this.#_init = true;
+        }
     }
 }
