@@ -147,7 +147,7 @@ export class InputRange extends HTMLElement {
         const { min, max } = this._minmax;
         const f = clamp(v, min, max);
 
-        if (this._value != f) {
+        if (true) {
             this._value = f;
 
             let x = this.normValue * this.width;
@@ -181,10 +181,12 @@ export class InputRange extends HTMLElement {
             let mm = this.getAttribute("min-max");
             if (mm) {
                 let [min, max] = mm.split(" ");
+                let n = this.normValue;
                 this.minmax = {
                     min: +min,
                     max: +max,
                 };
+                this.normValue = n;
             }
 
             this.#_init = true;
